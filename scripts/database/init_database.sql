@@ -3,12 +3,6 @@
 -- 日期: 2026-05-20
 -- 说明: 课堂智能考勤系统完整表结构，与 Java 实体 @TableName 严格一致
 
-CREATE DATABASE IF NOT EXISTS classroom_attendance
-DEFAULT CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE classroom_attendance;
-
 -- ========================
 -- 1. 班级表
 -- ========================

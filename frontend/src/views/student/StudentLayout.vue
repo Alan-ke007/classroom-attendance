@@ -1,6 +1,9 @@
 <template>
   <div class="student-layout">
-    <div class="student-sidebar">
+    <!-- 移动端遮罩层 -->
+    <div v-if="sidebarOpen" class="sidebar-overlay" @click="closeSidebar" />
+
+    <div :class="{ 'sidebar-open': sidebarOpen }" class="student-sidebar">
       <div class="logo">
         <div class="logo-icon">
           <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><circle cx="16" cy="14" r="6" stroke="#fff" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#007AFF"/><stop offset="100%" stop-color="#0055CC"/></linearGradient></defs></svg>
@@ -16,6 +19,7 @@
         background-color="#2c2c2e"
         text-color="#bfcbd9"
         active-text-color="#007AFF"
+        @select="onMenuSelect"
       >
         <el-menu-item index="/student/home">
           <el-icon><HomeFilled /></el-icon>
@@ -60,18 +64,25 @@
     <el-container>
       <el-header>
         <div class="header-content">
-          <div class="breadcrumb">
+          <div class="header-left">
+            <button class="hamburger" @click="toggleSidebar" :aria-label="sidebarOpen ? '关闭菜单' : '打开菜单'">
+              <span />
+              <span />
+              <span />
+            </button>
+            <div class="breadcrumb">
             <el-breadcrumb separator="/">
               <el-breadcrumb-item :to="{ path: '/student/home' }">智课考勤</el-breadcrumb-item>
               <el-breadcrumb-item>{{ currentPage }}</el-breadcrumb-item>
             </el-breadcrumb>
+          </div>
           </div>
           <div class="user-info">
             <el-tag v-if="role === 'student'" type="success" size="small" style="margin-right: 12px">学生</el-tag>
             <el-dropdown trigger="click">
               <span class="user-name">
                 <el-avatar :size="28" :src="avatarUrl" />
-                {{ userInfo?.realName || userInfo?.username }}
+                <span class="user-name-text">{{ userInfo?.realName || userInfo?.username }}</span>
                 <el-icon class="el-icon--right"><ArrowDown /></el-icon>
               </span>
               <template #dropdown>
@@ -120,6 +131,7 @@ const userInfo = ref(null)
 const role = ref('student')
 const unreadCount = ref(0)
 const showProfile = ref(false)
+const sidebarOpen = ref(false)
 const avatarUrl = ref('')
 let unreadTimer = null
 
@@ -139,6 +151,20 @@ const currentPage = computed(() => {
   }
   return map[route.path] || ''
 })
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
+function closeSidebar() {
+  sidebarOpen.value = false
+}
+
+function onMenuSelect() {
+  if (window.innerWidth < 768) {
+    sidebarOpen.value = false
+  }
+}
 
 onMounted(() => {
   const info = localStorage.getItem('userInfo')
@@ -256,4 +282,102 @@ const handleLogout = () => {
 }
 
 .chat-badge { margin-left: auto; }
+
+/* ========== 遮罩层 ========== */
+.sidebar-overlay {
+  display: none;
+}
+
+/* ========== 汉堡菜单按钮 ========== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1100;
+}
+.hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #606266;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.user-name-text {
+  display: inline;
+}
+
+/* ================================================================
+   响应式设计 — 移动端
+   ================================================================ */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .student-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .student-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(0, 0, 0, 0.45);
+    animation: fadeIn 0.25s ease;
+  }
+
+  .el-header {
+    padding: 0 12px;
+  }
+  .user-name-text {
+    display: none;
+  }
+  .breadcrumb {
+    max-width: 140px;
+    font-size: 13px;
+  }
+
+  .el-main {
+    padding: 12px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 </style>

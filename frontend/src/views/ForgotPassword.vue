@@ -260,7 +260,8 @@ const handleReset = async () => {
 }
 
 .forgot-card-wrapper {
-  width: 420px;
+  max-width: 420px;
+  width: 90%;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -340,5 +341,15 @@ const handleReset = async () => {
 }
 .back-link {
   font-weight: 600;
+}
+
+/* ========== 移动端 ========== */
+@media (max-width: 768px) {
+  .forgot-card-wrapper {
+    padding: 32px 24px 28px;
+  }
+  .brand-name {
+    font-size: 24px;
+  }
 }
 </style>
