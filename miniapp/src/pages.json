@@ -1,0 +1,67 @@
+{
+  "pages": [
+    {"path": "pages/login/index", "style": {"navigationBarTitleText": "登录"}},
+    {"path": "pages/register/index", "style": {"navigationBarTitleText": "注册"}},
+    {"path": "pages/student/home/index", "style": {"navigationBarTitleText": "学生首页"}},
+    {"path": "pages/student/schedule/index", "style": {"navigationBarTitleText": "课程表"}},
+    {"path": "pages/student/checkin/index", "style": {"navigationBarTitleText": "人脸签到"}},
+    {"path": "pages/student/attendance/index", "style": {"navigationBarTitleText": "考勤记录", "enablePullDownRefresh": true}},
+    {"path": "pages/student/behavior/index", "style": {"navigationBarTitleText": "行为记录", "enablePullDownRefresh": true}},
+    {"path": "pages/teacher/home/index", "style": {"navigationBarTitleText": "教师首页"}},
+    {"path": "pages/teacher/course/index", "style": {"navigationBarTitleText": "课程管理"}},
+    {"path": "pages/teacher/attendance/index", "style": {"navigationBarTitleText": "考勤管理"}},
+    {"path": "pages/teacher/behavior/index", "style": {"navigationBarTitleText": "行为预警"}},
+    {"path": "pages/teacher/student/index", "style": {"navigationBarTitleText": "学生列表"}},
+    {"path": "pages/student/leave/index", "style": {"navigationBarTitleText": "请假申请"}},
+    {"path": "pages/student/qrscan/index", "style": {"navigationBarTitleText": "扫码签到"}},
+    {"path": "pages/teacher/leave/index", "style": {"navigationBarTitleText": "请假管理"}},
+    {"path": "pages/notification/index", "style": {"navigationBarTitleText": "消息通知"}}
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "智课考勤",
+    "navigationBarBackgroundColor": "#4A90D9",
+    "backgroundColor": "#F5F5F5"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#4A90D9",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/student/home/index",
+        "text": "首页",
+        "iconPath": "static/icons/home.png",
+        "selectedIconPath": "static/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/student/schedule/index",
+        "text": "课程",
+        "iconPath": "static/icons/course.png",
+        "selectedIconPath": "static/icons/course-active.png"
+      },
+      {
+        "pagePath": "pages/student/attendance/index",
+        "text": "考勤",
+        "iconPath": "static/icons/attendance.png",
+        "selectedIconPath": "static/icons/attendance-active.png"
+      },
+      {
+        "pagePath": "pages/student/behavior/index",
+        "text": "行为",
+        "iconPath": "static/icons/behavior.png",
+        "selectedIconPath": "static/icons/behavior-active.png"
+      }
+    ]
+  },
+  "condition": {
+    "current": 0,
+    "list": [
+      {
+        "name": "学生首页",
+        "path": "pages/student/home/index"
+      }
+    ]
+  }
+}

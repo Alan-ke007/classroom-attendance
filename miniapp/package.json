@@ -1,0 +1,25 @@
+{
+  "name": "smartclass-attendance-miniapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "智课考勤 - 课堂智能考勤系统",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin && node -e \"const fs=require('fs'); const p='dist/dev/mp-weixin/app.json'; try { let c=fs.readFileSync(p,'utf-8'); c=c.replace(/,?\\s*\\\"usingComponents\\\"\\s*:\\s*\\{[^}]*\\}/g,''); fs.writeFileSync(p,c); } catch(e) {}\"",
+    "build:mp-weixin": "uni build -p mp-weixin && node -e \"const fs=require('fs'); const p='dist/build/mp-weixin/app.json'; let c=fs.readFileSync(p,'utf-8'); c=c.replace(/,?\\s*\\\"usingComponents\\\"\\s*:\\s*\\{[^}]*\\}/g,''); fs.writeFileSync(p,c); console.log('Cleaned usingComponents from app.json')\"",
+    "dev:h5": "uni"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.29.3",
+    "@dcloudio/uni-app": "3.0.0-4080420251103001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-4080420251103001",
+    "pinia": "^2.1.6",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.8",
+    "@dcloudio/uni-cli-shared": "3.0.0-4080420251103001",
+    "@dcloudio/uni-stacktracey": "3.0.0-4080420251103001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-4080420251103001",
+    "vite": "5.2.8"
+  }
+}
