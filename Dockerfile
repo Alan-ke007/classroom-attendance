@@ -5,7 +5,7 @@ ARG VITE_ALGORITHM_BASE_URL
 
 WORKDIR /app
 COPY frontend/package*.json ./
-RUN npm ci --no-optional
+RUN npm ci
 COPY frontend/ .
 RUN npm run build
 
