@@ -1,0 +1,19 @@
+# 合并数据集配置文件
+# 由 0.355k + 0.671k + 5k HRW 三个数据集合并而成
+
+# 数据集路径
+path: E:/classroom-attendance/algorithm-service/datasets/merged_dataset
+train: images/train
+val: images/val
+
+# 类别数量
+nc: 6
+
+# 类别名称列表（按索引顺序）
+names:
+  0: raising_hand    # 举手
+  1: reading         # 阅读
+  2: writing         # 书写
+  3: using_phone     # 使用手机
+  4: bowing_head     # 低头
+  5: leaning_over    # 趴桌
