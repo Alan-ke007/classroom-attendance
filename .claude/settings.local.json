@@ -172,7 +172,24 @@
       "Bash(winget list *)",
       "Bash(npm uninstall *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git config *)",
+      "Bash(rm -f \"E:/classroom-attendance/.git/index.lock\")",
+      "Bash(rm -f \"nul & netstat -ano | findstr :8080 | findstr LISTENING\")",
+      "Bash(git reset *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(railway login *)",
+      "Bash(export RAILWAY_API_TOKEN=bc73ede2-1ebf-422c-a4dd-96bb47434bf0)",
+      "Bash(railway whoami *)",
+      "Bash(RAILWAY_API_TOKEN=bc73ede2-1ebf-422c-a4dd-96bb47434bf0 railway status)",
+      "Bash(RAILWAY_TOKEN=bc73ede2-1ebf-422c-a4dd-96bb47434bf0 railway whoami)",
+      "Bash(RAILWAY_API_TOKEN=bc73ede2-1ebf-422c-a4dd-96bb47434bf0 railway init *)",
+      "Bash(RAILWAY_API_TOKEN=01d22eee-27c2-4557-8559-4a1cc5b5f368 railway init *)",
+      "Bash(RAILWAY_API_TOKEN=01d22eee-27c2-4557-8559-4a1cc5b5f368 railway link *)",
+      "Bash(RAILWAY_API_TOKEN=01d22eee-27c2-4557-8559-4a1cc5b5f368 railway --help)",
+      "Bash(RAILWAY_API_TOKEN=01d22eee-27c2-4557-8559-4a1cc5b5f368 railway add *)"
     ]
   }
 }
