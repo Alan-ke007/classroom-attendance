@@ -184,7 +184,8 @@ onMounted(() => loadCaptcha())
 }
 
 .register-card-wrapper {
-  width: 540px;
+  max-width: 540px;
+  width: 90%;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -224,4 +225,26 @@ onMounted(() => loadCaptcha())
 .captcha-image { width: 120px; height: 40px; border-radius: 8px; border: 1px solid #e4e7ed; cursor: pointer; }
 .login-link { text-align: center; font-size: 14px; color: #909399; }
 .to-login { font-weight: 600; margin-left: 4px; }
+
+/* ========== 移动端 ========== */
+@media (max-width: 768px) {
+  .register-card-wrapper {
+    padding: 28px 20px 24px;
+  }
+  .brand-name {
+    font-size: 22px;
+  }
+  :deep(.el-col) {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 0;
+  }
+  .captcha-row {
+    flex-wrap: wrap;
+  }
+  .captcha-image {
+    width: 100px;
+    height: 36px;
+  }
+}
 </style>

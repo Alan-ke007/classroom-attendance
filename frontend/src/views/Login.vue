@@ -191,7 +191,8 @@ const handleLogin = async () => {
 
 /* 卡片容器 */
 .login-card-wrapper {
-  width: 420px;
+  max-width: 420px;
+  width: 90%;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -287,5 +288,15 @@ const handleLogin = async () => {
 .forgot-link {
   font-size: 13px;
   color: #909399;
+}
+
+/* ========== 移动端 ========== */
+@media (max-width: 768px) {
+  .login-card-wrapper {
+    padding: 32px 24px 28px;
+  }
+  .brand-name {
+    font-size: 24px;
+  }
 }
 </style>
