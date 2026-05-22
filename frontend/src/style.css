@@ -294,3 +294,68 @@ code {
     border-right-color: var(--border);
   }
 }
+
+/* ================================================================
+   全局移动端响应式
+   ================================================================ */
+@media (max-width: 768px) {
+  /* 表格横向滚动 */
+  .el-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 表格单元格内容缩减 */
+  .el-table .cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  /* 分页器在小屏上缩小 */
+  .el-pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+  .el-pagination button,
+  .el-pagination .el-pager li {
+    min-width: 28px;
+    height: 28px;
+    line-height: 28px;
+  }
+
+  /* 表单标签置顶适配 */
+  .el-form-item__label {
+    font-size: 13px;
+  }
+
+  /* 弹窗全屏适配 */
+  .el-dialog {
+    width: 90% !important;
+    max-width: 500px;
+    margin: 10vh auto 0;
+  }
+
+  /* 卡片间距压缩 */
+  .el-card {
+    margin-bottom: 12px;
+  }
+
+  /* 统计卡片列纵向堆叠 */
+  .el-row.statistics-row > .el-col {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .el-dialog {
+    width: 95% !important;
+  }
+
+  .el-message-box {
+    width: 90% !important;
+    max-width: 360px;
+  }
+}
