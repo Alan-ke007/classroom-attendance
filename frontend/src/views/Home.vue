@@ -62,7 +62,7 @@
       <template #header>
         <div class="card-header">
           <span><el-icon style="vertical-align: middle; margin-right: 6px"><DataAnalysis /></el-icon>课堂质量评估</span>
-          <el-tag v-if="quality.score > 0" :type="quality.score >= 80 ? 'success' : quality.score >= 60 ? 'warning' : 'danger'" size="large">
+          <el-tag v-if="quality.score > 0" :type="quality.score >= 80 ? 'success' : quality.score >= 60 ? 'warning' : 'danger'" effect="dark" size="large">
             综合评分 {{ quality.score }} 分
           </el-tag>
         </div>
@@ -248,9 +248,9 @@ const getStatusText = (s) => ({ present:'出勤', absent:'缺勤', late:'迟到'
 
 .welcome-banner {
   display: flex; justify-content: space-between; align-items: center;
-  background: linear-gradient(135deg, #007AFF, #0055CC);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
   border-radius: 16px; padding: 28px 32px; margin-bottom: 24px;
-  color: #fff; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
+  color: #fff; box-shadow: var(--shadow-glow);
 }
 .welcome-text h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
 .welcome-text p { margin: 0; font-size: 13px; opacity: 0.85; }
@@ -261,27 +261,44 @@ const getStatusText = (s) => ({ present:'出勤', absent:'缺勤', late:'迟到'
 .stat-card {
   display: flex; align-items: center; gap: 16px;
   padding: 20px; border-radius: 14px; cursor: pointer;
-  background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: all 0.3s ease;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  box-shadow: var(--c-glass-shadow);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
-.stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+.stat-card:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  border-color: var(--c-primary);
+}
 .stat-icon-wrap {
   width: 56px; height: 56px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
 }
-.stat-card.blue .stat-icon-wrap { background: #ebf5ff; color: #007AFF; }
-.stat-card.green .stat-icon-wrap { background: #f0f9eb; color: #67c23a; }
-.stat-card.orange .stat-icon-wrap { background: #fdf6ec; color: #e6a23c; }
-.stat-card.red .stat-icon-wrap { background: #fef0f0; color: #f56c6c; }
-.stat-value { font-size: 28px; font-weight: 700; color: #303133; line-height: 1.2; }
-.stat-label { font-size: 13px; color: #909399; margin-top: 2px; }
+.stat-card.blue .stat-icon-wrap { background: var(--c-primary-bg); color: var(--c-primary); }
+.stat-card.green .stat-icon-wrap { background: var(--c-success-bg); color: var(--c-success); }
+.stat-card.orange .stat-icon-wrap { background: var(--c-warning-bg); color: var(--c-warning); }
+.stat-card.red .stat-icon-wrap { background: var(--c-danger-bg); color: var(--c-danger); }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--c-text); line-height: 1.2; }
+.stat-label { font-size: 13px; color: var(--c-text-tertiary); margin-top: 2px; }
 
 /* 卡片 */
 .section-card {
-  border-radius: 14px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 14px; border: 1px solid var(--c-glass-border);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--c-glass-shadow);
+  transition: all 0.3s ease;
+}
+.section-card:hover {
+  box-shadow: 0 4px 20px var(--c-shadow);
+  border-color: var(--c-primary);
 }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
-.card-header span { font-size: 16px; font-weight: 600; }
+.card-header span { font-size: 16px; font-weight: 600; color: var(--c-text); }
 
 /* 快捷操作网格 */
 .quick-grid {
@@ -290,44 +307,62 @@ const getStatusText = (s) => ({ present:'出勤', absent:'缺勤', late:'迟到'
 .quick-item {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 16px 8px; border-radius: 12px; cursor: pointer;
-  transition: all 0.25s ease; background: #fafafa;
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid transparent;
 }
-.quick-item:hover { background: #ebf5ff; transform: translateY(-2px); }
-.quick-item span { font-size: 13px; color: #606266; font-weight: 500; }
+.quick-item:hover {
+  background: var(--c-primary-bg);
+  border-color: var(--c-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px var(--c-shadow);
+}
+.quick-item span { font-size: 13px; color: var(--c-text-secondary); font-weight: 500; }
 .quick-icon-wrap {
   width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
-.c-blue { background: #ebf5ff; color: #007AFF; }
-.c-green { background: #f0f9eb; color: #67c23a; }
-.c-orange { background: #fdf6ec; color: #e6a23c; }
-.c-purple { background: #f4f0fe; color: #8b7cf6; }
-.c-teal { background: #e6faf7; color: #38b2ac; }
-.c-red { background: #fef0f0; color: #f56c6c; }
+.c-blue { background: var(--c-primary-bg); color: var(--c-primary); }
+.c-green { background: var(--c-success-bg); color: var(--c-success); }
+.c-orange { background: var(--c-warning-bg); color: var(--c-warning); }
+.c-purple { background: rgba(179,127,235,0.12); color: var(--c-purple, #b37feb); }
+.c-teal { background: rgba(56,178,172,0.1); color: #38b2ac; }
+.c-red { background: var(--c-danger-bg); color: var(--c-danger); }
 
 /* 最近考勤列表 */
-.empty-hint { text-align: center; padding: 40px 0; color: #c0c4cc; font-size: 14px; }
+.empty-hint { text-align: center; padding: 40px 0; color: var(--c-text-secondary); font-size: 14px; }
 .recent-list { display: flex; flex-direction: column; }
 .recent-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid #f5f5f5;
+  padding: 12px 0; border-bottom: 1px solid var(--c-border-light);
 }
 .recent-item:last-child { border-bottom: none; }
 .recent-info { flex: 1; }
-.recent-name { font-size: 14px; font-weight: 500; color: #303133; display: block; }
-.recent-class { font-size: 12px; color: #909399; display: block; margin-top: 2px; }
-.recent-time { font-size: 12px; color: #909399; }
+.recent-name { font-size: 14px; font-weight: 500; color: var(--c-text); display: block; }
+.recent-class { font-size: 12px; color: var(--c-text-tertiary); display: block; margin-top: 2px; }
+.recent-time { font-size: 12px; color: var(--c-text-tertiary); }
 
-/* 课堂质量评分卡片 */
+/* 课堂质量评分卡片 - glass morphism */
 .quality-item {
   text-align: center; padding: 16px 8px;
-  background: #fafafa; border-radius: 12px;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid var(--c-glass-border);
+  transition: all 0.3s ease;
+}
+.quality-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--c-shadow);
 }
 .q-value { font-size: 30px; font-weight: 700; line-height: 1.3; }
-.q-value.blue { color: #409eff; }
-.q-value.green { color: #67c23a; }
-.q-value.orange { color: #e6a23c; }
-.q-value.purple { color: #722ed1; }
-.q-label { font-size: 14px; color: #606266; margin-top: 4px; }
-.q-weight { font-size: 11px; color: #909399; margin-top: 2px; }
+.q-value.blue { color: var(--c-primary); }
+.q-value.green { color: var(--c-green, #52c41a); }
+.q-value.orange { color: var(--c-orange, #fa8c16); }
+.q-value.purple { color: var(--c-purple, #b37feb); }
+.q-label { font-size: 14px; color: var(--c-text-secondary); margin-top: 4px; }
+.q-weight { font-size: 11px; color: var(--c-text); opacity: 0.7; margin-top: 2px; }
 </style>

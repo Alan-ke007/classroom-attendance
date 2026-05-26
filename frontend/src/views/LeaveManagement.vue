@@ -45,7 +45,7 @@
               <el-button type="success" size="small" @click="approve(row)">通过</el-button>
               <el-button type="danger" size="small" @click="reject(row)">驳回</el-button>
             </template>
-            <span v-else style="color: #909399;">已处理</span>
+            <span v-else style="color: var(--c-text-tertiary);">已处理</span>
           </template>
         </el-table-column>
       </el-table>

@@ -11,7 +11,7 @@
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon" style="background-color: #409eff;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));">
               <el-icon :size="40"><User /></el-icon>
             </div>
             <div class="stat-info">
@@ -25,7 +25,7 @@
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon" style="background-color: #67c23a;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--c-success), #2db84d);">
               <el-icon :size="40"><School /></el-icon>
             </div>
             <div class="stat-info">
@@ -39,7 +39,7 @@
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon" style="background-color: #e6a23c;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--c-warning), #d48806);">
               <el-icon :size="40"><Calendar /></el-icon>
             </div>
             <div class="stat-info">
@@ -53,7 +53,7 @@
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-content">
-            <div class="stat-icon" style="background-color: #f56c6c;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--c-danger), #d32f2f);">
               <el-icon :size="40"><Warning /></el-icon>
             </div>
             <div class="stat-info">
@@ -75,7 +75,7 @@
           </el-tag>
         </div>
       </template>
-      <div v-if="quality.score === 0" style="text-align:center;padding:30px 0;color:#909399;">暂无足够数据生成课堂质量评分</div>
+      <div v-if="quality.score === 0" style="text-align:center;padding:30px 0;color:var(--c-text-tertiary);">暂无足够数据生成课堂质量评分</div>
       <el-row v-else :gutter="20">
         <el-col :span="6">
           <div class="quality-item">
@@ -198,15 +198,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import 'echarts-gl'
 import { User, School, Calendar, Warning, Document, DataAnalysis } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { useTheme } from '@/composables/useTheme'
 
 const router = useRouter()
+const { isDark } = useTheme()
 
 const statistics = ref({
   totalStudents: 0,
@@ -239,6 +241,16 @@ onMounted(() => {
   nextTick(() => {
     initCharts()
   })
+})
+
+// 监听主题变化重建图表
+watch(isDark, () => {
+  // 销毁旧实例
+  if (weekChart) weekChart.dispose()
+  if (classChart) classChart.dispose()
+  if (behaviorChart) behaviorChart.dispose()
+  if (scatterChart) scatterChart.dispose()
+  nextTick(() => initCharts())
 })
 
 const handleExportPdf = () => {
@@ -291,7 +303,7 @@ const initCharts = () => {
 
 const initWeekChart = async () => {
   if (weekChartRef.value) {
-    weekChart = echarts.init(weekChartRef.value)
+    weekChart = echarts.init(weekChartRef.value, isDark.value ? 'dark' : undefined)
 
     try {
       const today = new Date()
@@ -356,7 +368,7 @@ const initWeekChart = async () => {
 
 const initClassChart3D = async () => {
   if (classChartRef.value) {
-    classChart = echarts.init(classChartRef.value)
+    classChart = echarts.init(classChartRef.value, isDark.value ? 'dark' : undefined)
 
     try {
       const [rankingRes, classRes] = await Promise.all([
@@ -438,7 +450,7 @@ const initClassChart3D = async () => {
 
 const initBehaviorChart = async () => {
   if (behaviorChartRef.value) {
-    behaviorChart = echarts.init(behaviorChartRef.value)
+    behaviorChart = echarts.init(behaviorChartRef.value, isDark.value ? 'dark' : undefined)
     
     try {
       const behaviorRes = await request.get('/behavior/list', {
@@ -561,7 +573,7 @@ const initBehaviorChart = async () => {
 // --- 3D 散点图: 学生出勤-行为关联 ---
 const initScatter3D = async () => {
   if (!scatterChartRef.value) return
-  scatterChart = echarts.init(scatterChartRef.value)
+  scatterChart = echarts.init(scatterChartRef.value, isDark.value ? 'dark' : undefined)
 
   try {
     const [attendRes, behaviorRes] = await Promise.all([
@@ -679,6 +691,18 @@ const getStatusText = (status) => {
 
 .stat-card {
   margin-bottom: 20px;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--c-glass-shadow);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.stat-card:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 8px 30px var(--c-shadow);
+  border-color: var(--c-primary);
 }
 
 .stat-content {
@@ -690,11 +714,12 @@ const getStatusText = (status) => {
 .stat-icon {
   width: 80px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark)) !important;
 }
 
 .stat-info {
@@ -704,13 +729,13 @@ const getStatusText = (status) => {
 .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #303133;
+  color: var(--c-text);
   margin-bottom: 5px;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #909399;
+  color: var(--c-text-tertiary);
 }
 
 .card-header {
@@ -718,16 +743,29 @@ const getStatusText = (status) => {
   justify-content: space-between;
   align-items: center;
 }
+.card-header span {
+  color: var(--c-text);
+  font-weight: 600;
+}
 
 .quality-item {
   text-align: center; padding: 16px 8px;
-  background: #fafafa; border-radius: 12px;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid var(--c-glass-border);
+  transition: all 0.3s ease;
+}
+.quality-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--c-shadow);
 }
 .q-value { font-size: 30px; font-weight: 700; line-height: 1.3; }
-.q-value.blue { color: #409eff; }
-.q-value.green { color: #67c23a; }
-.q-value.orange { color: #e6a23c; }
-.q-value.purple { color: #722ed1; }
-.q-label { font-size: 14px; color: #606266; margin-top: 4px; }
-.q-weight { font-size: 11px; color: #909399; margin-top: 2px; }
+.q-value.blue { color: var(--c-primary); }
+.q-value.green { color: var(--c-green, #52c41a); }
+.q-value.orange { color: var(--c-orange, #fa8c16); }
+.q-value.purple { color: var(--c-purple, #b37feb); }
+.q-label { font-size: 14px; color: var(--c-text-secondary); margin-top: 4px; }
+.q-weight { font-size: 11px; color: var(--c-text-tertiary); margin-top: 2px; }
 </style>

@@ -1,6 +1,7 @@
 package com.classroom.attendance.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.classroom.attendance.model.User;
 import com.classroom.attendance.mapper.UserMapper;
 import com.classroom.attendance.service.UserService;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * 用户服务实现类
@@ -60,20 +62,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByUsernameAndEmail(String username, String email) {
-        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getUsername, username)
-               .eq(User::getEmail, email);
-        return userMapper.selectOne(wrapper);
+    public User getById(Long id) {
+        return userMapper.selectById(id);
     }
 
     @Override
-    public void updatePassword(Long userId, String newPassword) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        User user = new User();
-        user.setId(userId);
-        user.setPassword(encoder.encode(newPassword));
-        userMapper.updateById(user);
+    public Page<User> list(Integer page, Integer size, String role, String keyword) {
+        Page<User> pageObj = new Page<>(page, size);
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+
+        if (StringUtils.hasText(role)) {
+            wrapper.eq(User::getRole, role);
+        }
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like(User::getUsername, keyword)
+                    .or().like(User::getRealName, keyword));
+        }
+
+        wrapper.orderByDesc(User::getId);
+        return userMapper.selectPage(pageObj, wrapper);
     }
 
     @Override
@@ -93,5 +100,43 @@ public class UserServiceImpl implements UserService {
 
         userMapper.insert(user);
         return user;
+    }
+
+    @Override
+    public void update(User user) {
+        User existing = userMapper.selectById(user.getId());
+        if (existing == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 不更新密码字段（单独接口处理）
+        user.setPassword(null);
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public void delete(Long id) {
+        User existing = userMapper.selectById(id);
+        if (existing == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        userMapper.deleteById(id);
+    }
+
+    @Override
+    public User getUserByUsernameAndEmail(String username, String email) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username)
+               .eq(User::getEmail, email);
+        return userMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public void updatePassword(Long userId, String newPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        User user = new User();
+        user.setId(userId);
+        user.setPassword(encoder.encode(newPassword));
+        userMapper.updateById(user);
     }
 }

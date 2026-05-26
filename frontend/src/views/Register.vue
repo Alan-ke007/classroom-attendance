@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <ParticleBackground mode="network" color="#007AFF" />
+    <ParticleBackground mode="network" :color="isDark ? '#0A84FF' : '#007AFF'" />
     <div class="bg-shapes">
       <div class="shape shape-1"></div>
       <div class="shape shape-2"></div>
@@ -88,7 +88,10 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { register, getCaptcha } from '@/api/auth'
+import { useTheme } from '@/composables/useTheme'
 import ParticleBackground from '@/components/sci-fi/ParticleBackground.vue'
+
+const { isDark } = useTheme()
 
 const router = useRouter()
 const formRef = ref(null)
@@ -167,16 +170,17 @@ onMounted(() => loadCaptcha())
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(145deg, #f5f5f7 0%, #e8e8ed 30%, #f0f0f5 60%, #fafafc 100%);
+  background: var(--c-bg);
   position: relative;
   overflow: hidden;
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
+
 .bg-shapes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.shape { position: absolute; border-radius: 50%; opacity: 0.10; }
-.shape-1 { width: 400px; height: 400px; background: #007AFF; top: -10%; right: -8%; animation: float 22s ease-in-out infinite; }
-.shape-2 { width: 300px; height: 300px; background: #67C23A; bottom: -5%; left: -5%; animation: float 18s ease-in-out infinite reverse; }
-.shape-3 { width: 180px; height: 180px; background: #E6A23C; top: 30%; left: 10%; animation: float 20s ease-in-out infinite; }
+.shape { position: absolute; border-radius: 50%; opacity: 0.06; }
+.shape-1 { width: 400px; height: 400px; background: var(--c-primary); top: -10%; right: -8%; animation: float 22s ease-in-out infinite; }
+.shape-2 { width: 300px; height: 300px; background: var(--c-success); bottom: -5%; left: -5%; animation: float 18s ease-in-out infinite reverse; }
+.shape-3 { width: 180px; height: 180px; background: var(--c-warning); top: 30%; left: 10%; animation: float 20s ease-in-out infinite; }
+
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(25px, -25px) scale(1.05); }
@@ -186,50 +190,67 @@ onMounted(() => loadCaptcha())
 .register-card-wrapper {
   max-width: 540px;
   width: 90%;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(74, 144, 217, 0.15), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--c-glass-shadow);
   padding: 40px 44px;
   position: relative;
   z-index: 1;
   animation: cardIn 0.6s ease-out;
 }
+
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 .brand-section { text-align: center; margin-bottom: 28px; }
-.brand-name { font-size: 24px; font-weight: 700; color: #303133; margin: 0 0 6px; letter-spacing: 2px; }
-.brand-tagline { font-size: 13px; color: #909399; margin: 0; }
+.brand-name { font-size: 24px; font-weight: 700; color: var(--c-text); margin: 0 0 6px; letter-spacing: 2px; }
+.brand-tagline { font-size: 13px; color: var(--c-text-secondary); margin: 0; }
 
 .register-form { margin-bottom: 0; }
-.custom-input :deep(.el-input__wrapper) {
+
+:deep(.el-input__wrapper) {
+  background: var(--c-fill-color, var(--c-bg-alt));
   border-radius: 8px;
-  box-shadow: 0 0 0 1px #e4e7ed inset;
+  box-shadow: 0 0 0 1px var(--c-border) inset;
   transition: all 0.3s;
 }
-.custom-input :deep(.el-input__wrapper:hover) { box-shadow: 0 0 0 1px #c0c4cc inset; }
-.custom-input :deep(.el-input__wrapper.is-focus) { box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.25) inset; }
+:deep(.el-input__wrapper:hover) { box-shadow: 0 0 0 1px var(--c-text-tertiary) inset; }
+:deep(.el-input__wrapper.is-focus) { box-shadow: 0 0 0 2px var(--c-primary-bg) inset, 0 0 0 1px var(--c-primary) inset; }
+
+:deep(.el-radio-button__inner) {
+  border-color: var(--c-border);
+  color: var(--c-text-secondary);
+}
+
 .register-btn {
   width: 100%; height: 46px; border-radius: 10px; font-size: 16px; font-weight: 600;
   letter-spacing: 4px;
-  background: linear-gradient(135deg, #007AFF, #0055CC); border: none;
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-dark));
+  border: none;
   transition: all 0.3s;
 }
-.register-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(74, 144, 217, 0.35); }
+.register-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+
 .role-group { display: flex; width: 100%; }
-.role-group :deep(.el-radio-button__inner) { border-radius: 8px; padding: 8px 28px; }
 .captcha-row { display: flex; align-items: center; gap: 10px; width: 100%; }
 .captcha-input { flex: 1; }
-.captcha-image { width: 120px; height: 40px; border-radius: 8px; border: 1px solid #e4e7ed; cursor: pointer; }
-.login-link { text-align: center; font-size: 14px; color: #909399; }
+.captcha-image { width: 120px; height: 40px; border-radius: 8px; border: 1px solid var(--c-border); cursor: pointer; }
+.login-link { text-align: center; font-size: 14px; color: var(--c-text-secondary); }
 .to-login { font-weight: 600; margin-left: 4px; }
 
 /* ========== 移动端 ========== */
 @media (max-width: 768px) {
   .register-card-wrapper {
     padding: 28px 20px 24px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
   .brand-name {
     font-size: 22px;

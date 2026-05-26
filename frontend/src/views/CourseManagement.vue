@@ -71,7 +71,7 @@
         </el-form-item>
         <el-form-item label="起始周">
           <el-input-number v-model="form.startWeek" :min="1" :max="20" placeholder="1" style="width: 120px" />
-          <span style="margin: 0 8px; color: #909399;">至</span>
+          <span style="margin: 0 8px; color: var(--c-text-tertiary);">至</span>
           <el-input-number v-model="form.endWeek" :min="1" :max="20" placeholder="16" style="width: 120px" />
         </el-form-item>
       </el-form>

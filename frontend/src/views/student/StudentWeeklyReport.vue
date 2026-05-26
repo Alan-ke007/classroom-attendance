@@ -89,6 +89,9 @@ import { ElMessage } from 'element-plus'
 import { DataAnalysis, MagicStick } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import * as echarts from 'echarts'
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark } = useTheme()
 
 const report = ref({
   attendanceRate: 0, totalClasses: 0, presentCount: 0, lateCount: 0, absentCount: 0,
@@ -115,7 +118,7 @@ onMounted(async () => {
 
 function renderChart() {
   if (!trendChartRef.value || !report.value.trend?.length) return
-  const chart = echarts.init(trendChartRef.value)
+  const chart = echarts.init(trendChartRef.value, isDark.value ? 'dark' : undefined)
   const dates = report.value.trend.map(t => {
     const d = t.date.split('-')
     return `${d[1]}/${d[2]}`
@@ -149,36 +152,44 @@ function renderChart() {
 <style scoped>
 .weekly-report { max-width: 1000px; margin: 0 auto; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
+.card-header span { color: var(--c-text); font-weight: 600; }
 
 .stat-card {
-  background: #fff; border-radius: 12px; padding: 20px;
-  text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background: var(--c-card);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 12px; padding: 20px;
+  text-align: center; box-shadow: var(--c-glass-shadow);
+  transition: all 0.3s ease;
 }
-.stat-value { font-size: 32px; font-weight: 700; }
-.stat-value.blue { color: #409eff; }
-.stat-value.green { color: #67c23a; }
-.stat-value.orange { color: #e6a23c; }
-.stat-value.purple { color: #722ed1; }
-.stat-label { font-size: 14px; color: #606266; margin-top: 4px; }
-.stat-sub { font-size: 11px; color: #909399; margin-top: 2px; }
+.stat-card:hover {
+  transform: translateY(-4px) rotateX(2deg);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+.stat-value { font-size: 32px; font-weight: 700; color: var(--c-text); }
+.stat-value.blue { color: var(--c-primary); }
+.stat-value.green { color: var(--c-success); }
+.stat-value.orange { color: var(--c-warning); }
+.stat-value.purple { color: var(--c-purple, #b37feb); }
+.stat-label { font-size: 14px; color: var(--c-text-secondary); margin-top: 4px; }
+.stat-sub { font-size: 11px; color: var(--c-text-tertiary); margin-top: 2px; }
 
-.chart-empty { text-align: center; padding: 40px 0; color: #909399; font-size: 13px; }
+.chart-empty { text-align: center; padding: 40px 0; color: var(--c-text-tertiary); font-size: 13px; }
 
 .violation-list { display: flex; flex-direction: column; gap: 8px; }
 .v-item {
   display: flex; align-items: center; padding: 12px;
-  background: #fafafa; border-radius: 8px;
+  background: var(--c-fill-color, var(--c-bg-alt)); border-radius: 8px;
 }
 .v-icon { font-size: 20px; margin-right: 10px; }
-.v-label { flex: 1; font-size: 14px; color: #303133; }
-.v-count { font-size: 14px; font-weight: 600; color: #e6a23c; }
+.v-label { flex: 1; font-size: 14px; color: var(--c-text); }
+.v-count { font-size: 14px; font-weight: 600; color: var(--c-warning); }
 
 .suggestion-box {
-  background: linear-gradient(135deg, #f0f9ff, #e6f7ff);
-  border-radius: 12px; padding: 20px; border: 1px solid #bae7ff;
+  background: linear-gradient(135deg, var(--c-primary-bg), rgba(0,122,255,0.05));
+  border-radius: 12px; padding: 20px; border: 1px solid var(--c-primary);
 }
 .suggestion-text {
-  font-size: 15px; color: #303133; line-height: 1.8;
+  font-size: 15px; color: var(--c-text); line-height: 1.8;
   white-space: pre-wrap;
 }
 </style>

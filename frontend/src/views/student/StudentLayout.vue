@@ -16,9 +16,6 @@
       <el-menu
         :default-active="activeMenu"
         router
-        background-color="#2c2c2e"
-        text-color="#bfcbd9"
-        active-text-color="#007AFF"
         @select="onMenuSelect"
       >
         <el-menu-item index="/student/home">
@@ -78,6 +75,7 @@
           </div>
           </div>
           <div class="user-info">
+            <ThemeToggle />
             <el-tag v-if="role === 'student'" type="success" size="small" style="margin-right: 12px">学生</el-tag>
             <el-dropdown trigger="click">
               <span class="user-name">
@@ -123,7 +121,11 @@ import {
   DataAnalysis
 } from '@element-plus/icons-vue'
 import { getUnreadCount } from '@/api/chat'
+import { useTheme } from '@/composables/useTheme'
 import ProfileDialog from '@/components/ProfileDialog.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
+
+const { isDark } = useTheme()
 
 const router = useRouter()
 const route = useRoute()
@@ -202,15 +204,18 @@ const handleLogout = () => {
 .student-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: transparent;
 }
 
 .student-sidebar {
   width: 200px;
-  background: linear-gradient(180deg, #1c1c1e 0%, #2c2c2e 100%);
-  color: #fff;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border);
+  color: var(--c-text);
   overflow-x: hidden;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--c-glass-shadow);
 }
 
 .logo {
@@ -218,15 +223,15 @@ const handleLogout = () => {
   align-items: center;
   gap: 10px;
   padding: 16px 18px;
-  background: rgba(0, 0, 0, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--c-glass-bg);
+  border-bottom: 1px solid var(--c-glass-border);
 }
 .logo-icon svg { display: block; width: 32px; height: 32px; }
 .logo-text h3 {
-  margin: 0; color: #fff; font-size: 15px; font-weight: 600; line-height: 1.2;
+  margin: 0; color: var(--c-text); font-size: 15px; font-weight: 600; line-height: 1.2;
 }
 .logo-sub {
-  margin: 1px 0 0; font-size: 11px; color: rgba(255, 255, 255, 0.5);
+  margin: 1px 0 0; font-size: 11px; color: var(--c-text-tertiary);
 }
 
 .el-menu {
@@ -237,22 +242,26 @@ const handleLogout = () => {
   transition: all 0.25s ease;
   margin: 2px 8px;
   border-radius: 8px;
+  color: var(--c-text-secondary) !important;
 }
 :deep(.el-menu-item:hover) {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: var(--c-primary-bg) !important;
+  color: var(--c-primary) !important;
 }
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, rgba(64, 158, 255, 0.25), rgba(64, 158, 255, 0.08)) !important;
-  color: #409eff !important;
+  background: linear-gradient(90deg, var(--c-primary-bg), transparent) !important;
+  color: var(--c-primary) !important;
   font-weight: 600;
-  border-radius: 8px;
 }
 
 .el-header {
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 1px 0 var(--c-glass-border);
   padding: 0 20px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--c-glass-border);
+  transition: background-color 0.3s ease;
 }
 
 .header-content {
@@ -265,6 +274,7 @@ const handleLogout = () => {
 .user-info {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .user-name {
@@ -272,7 +282,7 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #606266;
+  color: var(--c-text-secondary);
   font-size: 14px;
 }
 
@@ -306,7 +316,7 @@ const handleLogout = () => {
   display: block;
   width: 100%;
   height: 2px;
-  background: #606266;
+  background: var(--c-text-secondary);
   border-radius: 2px;
   transition: all 0.3s ease;
   transform-origin: center;
@@ -356,7 +366,7 @@ const handleLogout = () => {
     position: fixed;
     inset: 0;
     z-index: 1040;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     animation: fadeIn 0.25s ease;
   }
 

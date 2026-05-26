@@ -130,7 +130,7 @@
               </div>
               <div class="stat-item">
                 <div class="stat-label">异常行为</div>
-                <div class="stat-value" style="color: #f56c6c;">{{ monitorStats.abnormal }}</div>
+                <div class="stat-value" style="color: var(--c-danger);">{{ monitorStats.abnormal }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">监控时长</div>
@@ -548,7 +548,7 @@ onUnmounted(() => {
 /* 页面加载动画 */
 .behavior-monitor {
   padding: 20px;
-  background: #f5f7fa;
+  background: transparent;
   min-height: calc(100vh - 60px);
   animation: fadeIn 0.5s ease-out;
 }
@@ -570,14 +570,16 @@ onUnmounted(() => {
   align-items: center;
   font-weight: 500;
   font-size: 16px;
-  color: #303133;
+  color: var(--c-text);
 }
 
 .video-container {
   position: relative;
-  background: #fff;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 12px;
   overflow: hidden;
   min-height: 500px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -596,8 +598,8 @@ onUnmounted(() => {
 }
 
 .video-container:hover {
-  border-color: #c0c4cc;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--c-primary);
+  box-shadow: 0 4px 20px var(--c-shadow);
   transform: translateY(-2px);
 }
 
@@ -606,7 +608,7 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #909399;
+  color: var(--c-text-tertiary);
   font-size: 16px;
   text-align: center;
 }
@@ -621,10 +623,12 @@ onUnmounted(() => {
 
 .stat-item {
   padding: 20px 15px;
-  background: #fff;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  color: #606266;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 12px;
+  color: var(--c-text-secondary);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex: 1;
   animation: scaleIn 0.5s ease-out backwards;
@@ -646,8 +650,8 @@ onUnmounted(() => {
 }
 
 .stat-item:hover {
-  border-color: #409eff;
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
+  border-color: var(--c-primary);
+  box-shadow: 0 4px 16px var(--c-shadow);
   transform: translateY(-4px);
 }
 
@@ -655,23 +659,23 @@ onUnmounted(() => {
   font-size: 32px;
   font-weight: 600;
   margin-top: 10px;
-  color: #303133;
+  color: var(--c-text);
   transition: all 0.3s ease;
 }
 
 .stat-item:hover .stat-value {
-  color: #409eff;
+  color: var(--c-primary);
   transform: scale(1.05);
 }
 
 .stat-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--c-text-tertiary);
   transition: all 0.3s ease;
 }
 
 .stat-item:hover .stat-label {
-  color: #606266;
+  color: var(--c-text-secondary);
 }
 
 .upload-placeholder {
@@ -679,7 +683,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fafafa;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
   border-radius: 8px;
   width: 100%;
   flex-direction: column;
@@ -693,17 +699,17 @@ onUnmounted(() => {
 .behavior-uploader :deep(.el-upload-dragger) {
   width: 100%;
   padding: 60px 40px;
-  background: #fff;
-  border: 2px dashed #dcdfe6;
-  border-radius: 8px;
+  background: var(--c-card);
+  border: 2px dashed var(--c-border);
+  border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .behavior-uploader :deep(.el-upload-dragger:hover) {
-  border-color: #409eff;
-  background: #ecf5ff;
+  border-color: var(--c-primary);
+  background: var(--c-primary-bg);
   transform: scale(1.02);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 4px 12px var(--c-shadow);
 }
 
 .image-preview {
@@ -717,23 +723,25 @@ onUnmounted(() => {
   max-width: 100%;
   max-height: 400px;
   border-radius: 8px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--c-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .image-preview img:hover {
-  border-color: #409eff;
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2);
+  border-color: var(--c-primary);
+  box-shadow: 0 4px 16px var(--c-shadow);
   transform: scale(1.02);
 }
 
-/* 卡片样式优化 */
+/* 卡片样式优化 - glass morphism */
 :deep(.el-card) {
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e4e7ed;
+  border-radius: 12px;
+  box-shadow: var(--c-glass-shadow);
+  border: 1px solid var(--c-glass-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #fff;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   animation: slideUp 0.6s ease-out backwards;
 }
 
@@ -741,15 +749,16 @@ onUnmounted(() => {
 :deep(.el-card:nth-child(2)) { animation-delay: 0.3s; }
 
 :deep(.el-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 24px var(--c-shadow);
+  border-color: var(--c-primary);
   transform: translateY(-2px);
 }
 
 :deep(.el-card__header) {
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--c-border-light);
   padding: 15px 20px;
   font-weight: 500;
-  color: #303133;
+  color: var(--c-text);
 }
 
 /* 按钮样式 */
@@ -766,7 +775,7 @@ onUnmounted(() => {
 
 :deep(.el-button:hover) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--c-shadow);
 }
 
 :deep(.el-button:active) {
@@ -787,8 +796,8 @@ onUnmounted(() => {
 
 /* 提示框样式 */
 :deep(.el-alert) {
-  border-radius: 4px;
-  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  border: 1px solid var(--c-border);
   animation: slideDown 0.5s ease-out;
 }
 
@@ -833,17 +842,17 @@ onUnmounted(() => {
 
 :deep(.el-timeline-item:hover .el-timeline-item__node) {
   transform: scale(1.3);
-  box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 0 0 4px var(--c-primary-bg);
 }
 
 :deep(.el-timeline-item__timestamp) {
   font-weight: 400;
-  color: #909399;
+  color: var(--c-text-tertiary);
   transition: all 0.3s ease;
 }
 
 :deep(.el-timeline-item:hover .el-timeline-item__timestamp) {
-  color: #409eff;
+  color: var(--c-primary);
 }
 
 /* 响应式设计 */
@@ -851,15 +860,15 @@ onUnmounted(() => {
   .behavior-monitor {
     padding: 10px;
   }
-  
+
   .video-container {
     min-height: 350px;
   }
-  
+
   .stat-value {
     font-size: 28px;
   }
-  
+
   .monitor-stats {
     flex-direction: column;
   }

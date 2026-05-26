@@ -1,5 +1,6 @@
 package com.classroom.attendance.controller;
 
+import com.classroom.attendance.annotation.OperationLog;
 import com.classroom.attendance.annotation.RequireRole;
 import com.classroom.attendance.common.Result;
 import com.classroom.attendance.dto.LoginReq;
@@ -41,6 +42,7 @@ public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @OperationLog(title = "用户登录", operation = "login")
     @PostMapping("/login")
     public Result<LoginVO> login(@Valid @RequestBody LoginReq req) {
         String token = userService.login(req.getUsername(), req.getPassword());
@@ -61,6 +63,7 @@ public class AuthController {
         return Result.success(builder.build());
     }
 
+    @OperationLog(title = "用户注册", operation = "create")
     @PostMapping("/register")
     public Result<UserVO> register(@Valid @RequestBody RegisterReq req) {
         if (!captchaService.verify(req.getCaptchaId(), req.getCaptchaCode())) {

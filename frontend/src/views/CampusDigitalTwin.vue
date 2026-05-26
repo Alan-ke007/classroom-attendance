@@ -17,6 +17,6 @@
   align-items: center;
   justify-content: center;
   height: calc(100vh - 120px);
-  background: #f5f7fa;
+  background: var(--c-bg);
 }
 </style>

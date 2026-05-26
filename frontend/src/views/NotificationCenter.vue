@@ -87,17 +87,18 @@ onMounted(loadList)
 
 <style scoped>
 .card-header { display: flex; justify-content: space-between; align-items: center; }
-.empty { text-align: center; padding: 60px 0; color: #909399; }
+.card-header span { color: var(--c-text); font-weight: 600; }
+.empty { text-align: center; padding: 60px 0; color: var(--c-text-tertiary); }
 .notif-item {
-  display: flex; padding: 14px; border-bottom: 1px solid #f0f0f0;
+  display: flex; padding: 14px; border-bottom: 1px solid var(--c-border-light);
   cursor: pointer; transition: background 0.2s;
 }
-.notif-item:hover { background: #f5f7fa; }
-.notif-item.unread { background: #ecf5ff; }
+.notif-item:hover { background: var(--c-fill-color, var(--c-bg-alt)); }
+.notif-item.unread { background: var(--c-primary-bg); }
 .notif-icon { font-size: 28px; margin-right: 14px; width: 40px; text-align: center; }
 .notif-body { flex: 1; }
-.notif-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.notif-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; color: var(--c-text); }
 .notif-title .el-tag { margin-left: 8px; }
-.notif-content { font-size: 13px; color: #606266; margin-bottom: 4px; }
-.notif-time { font-size: 12px; color: #909399; }
+.notif-content { font-size: 13px; color: var(--c-text-secondary); margin-bottom: 4px; }
+.notif-time { font-size: 12px; color: var(--c-text-tertiary); }
 </style>

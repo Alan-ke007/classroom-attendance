@@ -144,11 +144,11 @@ onMounted(loadData)
 <style scoped>
 .filter-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
 .stat-item {
-  border-left: 4px solid #409EFF;
+  border-left: 4px solid var(--c-primary);
   padding: 12px 16px;
-  background: #fafafa;
+  background: var(--c-fill-color, var(--c-bg-alt));
   border-radius: 4px;
 }
-.stat-value { font-size: 28px; font-weight: 700; }
-.stat-label { font-size: 13px; color: #909399; margin-top: 4px; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--c-text); }
+.stat-label { font-size: 13px; color: var(--c-text-tertiary); margin-top: 4px; }
 </style>
