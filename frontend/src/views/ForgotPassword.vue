@@ -1,6 +1,6 @@
 <template>
   <div class="forgot-container">
-    <ParticleBackground mode="network" color="#007AFF" />
+    <ParticleBackground mode="network" :color="isDark ? '#0A84FF' : '#007AFF'" />
     <div class="bg-shapes">
       <div class="shape shape-1"></div>
       <div class="shape shape-2"></div>
@@ -119,7 +119,10 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { forgotPassword, resetPassword } from '@/api/auth'
+import { useTheme } from '@/composables/useTheme'
 import ParticleBackground from '@/components/sci-fi/ParticleBackground.vue'
+
+const { isDark } = useTheme()
 
 const router = useRouter()
 const step = ref(1)
@@ -212,10 +215,9 @@ const handleReset = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(145deg, #f5f5f7 0%, #e8e8ed 30%, #f0f0f5 60%, #fafafc 100%);
+  background: var(--c-bg);
   position: relative;
   overflow: hidden;
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 .bg-shapes {
@@ -227,29 +229,29 @@ const handleReset = async () => {
 .shape {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.12;
+  opacity: 0.06;
 }
 .shape-1 {
   width: 500px; height: 500px;
-  background: #007AFF;
+  background: var(--c-primary);
   top: -15%; right: -10%;
   animation: float 20s ease-in-out infinite;
 }
 .shape-2 {
   width: 400px; height: 400px;
-  background: #0055CC;
+  background: var(--c-primary-dark);
   bottom: -10%; left: -5%;
   animation: float 25s ease-in-out infinite reverse;
 }
 .shape-3 {
   width: 200px; height: 200px;
-  background: #67C23A;
+  background: var(--c-success);
   top: 20%; left: 15%;
   animation: float 15s ease-in-out infinite;
 }
 .shape-4 {
   width: 150px; height: 150px;
-  background: #E6A23C;
+  background: var(--c-warning);
   bottom: 25%; right: 20%;
   animation: float 18s ease-in-out infinite reverse;
 }
@@ -262,10 +264,12 @@ const handleReset = async () => {
 .forgot-card-wrapper {
   max-width: 420px;
   width: 90%;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(74, 144, 217, 0.15), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--c-glass-shadow);
   padding: 48px 40px 40px;
   position: relative;
   z-index: 1;
@@ -292,13 +296,13 @@ const handleReset = async () => {
 .brand-name {
   font-size: 28px;
   font-weight: 700;
-  color: #303133;
+  color: var(--c-text);
   margin: 0 0 6px;
   letter-spacing: 2px;
 }
 .brand-tagline {
   font-size: 13px;
-  color: #909399;
+  color: var(--c-text-tertiary);
   margin: 0;
 }
 

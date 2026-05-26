@@ -1,6 +1,7 @@
 package com.classroom.attendance.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classroom.attendance.annotation.OperationLog;
 import com.classroom.attendance.annotation.RequireRole;
 import com.classroom.attendance.common.Result;
 import com.classroom.attendance.model.LeaveRequest;
@@ -55,6 +56,7 @@ public class LeaveController {
      * 审批通过
      */
     @RequireRole({"admin", "teacher"})
+    @OperationLog(title = "审批通过请假", operation = "update")
     @PutMapping("/approve/{id}")
     public Result<LeaveRequest> approve(
             @PathVariable Long id,
@@ -75,6 +77,7 @@ public class LeaveController {
      * 驳回申请
      */
     @RequireRole({"admin", "teacher"})
+    @OperationLog(title = "驳回请假", operation = "update")
     @PutMapping("/reject/{id}")
     public Result<LeaveRequest> reject(
             @PathVariable Long id,

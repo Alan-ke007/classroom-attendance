@@ -77,11 +77,11 @@ async function submitManualCode() {
 .qr-scan-page { max-width: 600px; margin: 0 auto; }
 .scan-area { text-align: center; padding: 40px 0; }
 .scan-icon-wrap { margin-bottom: 20px; }
-.scan-hint h3 { font-size: 17px; font-weight: 600; color: #303133; margin: 0 0 8px; }
-.scan-sub { font-size: 14px; color: #909399; margin: 0 0 12px; }
-.manual-hint { font-size: 13px; color: #909399; margin-bottom: 10px; }
+.scan-hint h3 { font-size: 17px; font-weight: 600; color: var(--c-text); margin: 0 0 8px; }
+.scan-sub { font-size: 14px; color: var(--c-text-tertiary); margin: 0 0 12px; }
+.manual-hint { font-size: 13px; color: var(--c-text-tertiary); margin-bottom: 10px; }
 .code-input { width: 320px; display: inline-block; }
 .result-msg { margin-top: 16px; font-size: 15px; font-weight: 500; }
-.result-msg.success { color: #67c23a; }
-.result-msg.error { color: #f56c6c; }
+.result-msg.success { color: var(--c-success); }
+.result-msg.error { color: var(--c-danger); }
 </style>

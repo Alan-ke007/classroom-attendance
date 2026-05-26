@@ -1,6 +1,7 @@
 package com.classroom.attendance.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classroom.attendance.annotation.OperationLog;
 import com.classroom.attendance.annotation.RequireRole;
 import com.classroom.attendance.common.Result;
 import com.classroom.attendance.mapper.ClassMapper;
@@ -201,6 +202,7 @@ public class AttendanceController {
     /**
      * 添加考勤记录
      */
+    @OperationLog(title = "添加考勤记录", operation = "create")
     @RequireRole({"admin", "teacher"})
     @PostMapping
     public Result<String> addAttendance(@RequestBody Attendance attendance) {
@@ -222,6 +224,7 @@ public class AttendanceController {
     /**
      * 更新考勤记录
      */
+    @OperationLog(title = "更新考勤记录", operation = "update")
     @RequireRole({"admin", "teacher"})
     @PutMapping("/{id}")
     public Result<String> updateAttendance(@PathVariable Long id, @RequestBody Attendance attendance) {
@@ -244,6 +247,7 @@ public class AttendanceController {
     /**
      * 删除考勤记录
      */
+    @OperationLog(title = "删除考勤记录", operation = "delete")
     @RequireRole({"admin", "teacher"})
     @DeleteMapping("/{id}")
     public Result<String> deleteAttendance(@PathVariable Long id) {
@@ -265,6 +269,7 @@ public class AttendanceController {
     /**
      * 导出考勤记录为Excel
      */
+    @OperationLog(title = "导出考勤", operation = "export")
     @RequireRole({"admin", "teacher"})
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportAttendance(

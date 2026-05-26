@@ -15,10 +15,10 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--c-bg);
 }
 .content { text-align: center; }
-.code { font-size: 120px; font-weight: 700; color: #E6A23C; line-height: 1; }
-.title { font-size: 24px; color: #303133; margin: 16px 0 8px; }
-.desc { font-size: 14px; color: #909399; margin-bottom: 24px; }
+.code { font-size: 120px; font-weight: 700; color: var(--c-warning); line-height: 1; }
+.title { font-size: 24px; color: var(--c-text); margin: 16px 0 8px; }
+.desc { font-size: 14px; color: var(--c-text-tertiary); margin-bottom: 24px; }
 </style>

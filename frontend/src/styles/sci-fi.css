@@ -1,5 +1,5 @@
 /* ========================================
-   科幻 UI 效果库
+   科幻 UI 效果库（CSS 变量版）
    ======================================== */
 
 /* --- Scan-line overlay --- */
@@ -15,8 +15,8 @@
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 122, 255, 0.025) 2px,
-    rgba(0, 122, 255, 0.025) 4px
+    var(--c-scan-line) 2px,
+    var(--c-scan-line) 4px
   );
   pointer-events: none;
   z-index: 1;
@@ -29,11 +29,11 @@
 
 /* --- Neon glow --- */
 .neon-glow {
-  box-shadow: 0 0 8px rgba(0, 122, 255, 0.3), 0 0 16px rgba(0, 122, 255, 0.15);
+  box-shadow: 0 0 8px var(--c-neon-glow), 0 0 16px rgba(0, 122, 255, 0.15);
   transition: box-shadow 0.3s ease;
 }
 .neon-glow:hover {
-  box-shadow: 0 0 12px rgba(0, 122, 255, 0.5), 0 0 24px rgba(0, 122, 255, 0.25), 0 0 40px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 12px var(--c-neon-glow-hover), 0 0 24px rgba(0, 122, 255, 0.25), 0 0 40px rgba(0, 122, 255, 0.1);
 }
 .neon-glow-green {
   box-shadow: 0 0 8px rgba(52, 199, 89, 0.3), 0 0 16px rgba(52, 199, 89, 0.15);
@@ -45,13 +45,13 @@
 /* --- Data stream text --- */
 .data-stream-text {
   font-family: 'Courier New', 'Source Code Pro', monospace;
-  color: var(--c-primary, #007AFF);
+  color: var(--c-primary);
   letter-spacing: 0.05em;
   animation: dataPulse 2s ease-in-out infinite;
 }
 @keyframes dataPulse {
-  0%, 100% { opacity: 0.8; text-shadow: 0 0 4px rgba(0, 122, 255, 0.3); }
-  50% { opacity: 1; text-shadow: 0 0 12px rgba(0, 122, 255, 0.6), 0 0 24px rgba(0, 122, 255, 0.2); }
+  0%, 100% { opacity: 0.8; text-shadow: 0 0 4px var(--c-neon-glow); }
+  50% { opacity: 1; text-shadow: 0 0 12px var(--c-neon-glow), 0 0 24px rgba(0, 122, 255, 0.2); }
 }
 
 /* --- Glitch effect --- */
@@ -70,7 +70,7 @@
 /* --- Flowing gradient border --- */
 .glowing-border {
   position: relative;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 .glowing-border::before {
@@ -78,7 +78,7 @@
   position: absolute;
   inset: -2px;
   border-radius: inherit;
-  background: conic-gradient(from 0deg, #007AFF, #00D4FF, #007AFF, #5856D6, #007AFF);
+  background: conic-gradient(from 0deg, var(--c-primary), #00D4FF, var(--c-primary), #5856D6, var(--c-primary));
   animation: spinBorder 4s linear infinite;
   z-index: 0;
 }
@@ -87,7 +87,7 @@
   position: absolute;
   inset: 1px;
   border-radius: inherit;
-  background: var(--c-card, #fff);
+  background: var(--c-card);
   z-index: 0;
 }
 .glowing-border > * {
@@ -101,17 +101,66 @@
 
 /* --- Frosted glass --- */
 .frosted-glass {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--c-glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: var(--radius, 12px);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-md);
+}
+
+.frosted-glass-strong {
+  background: var(--c-glass-bg-strong);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--c-glass-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--c-glass-shadow);
+}
+
+/* --- Sidebar glass --- */
+.sidebar-glass {
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border);
+}
+
+.sidebar-glass-strong {
+  background: var(--c-glass-bg-strong);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border-strong);
+  box-shadow: var(--c-glass-shadow);
+}
+
+/* --- Noise overlay — 噪点纹理，增强毛玻璃质感 --- */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  border-radius: inherit;
+}
+.noise-overlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="dark"] .noise-overlay::after {
+  opacity: 0.04;
 }
 
 /* --- Data readout --- */
 .data-readout {
   font-family: 'Courier New', 'Source Code Pro', monospace;
-  color: var(--c-primary, #007AFF);
+  color: var(--c-primary);
   letter-spacing: 0.1em;
 }
 
@@ -119,8 +168,12 @@
 .el-card.sci-fi-card {
   border: 1px solid rgba(0, 122, 255, 0.15);
   box-shadow: 0 0 12px rgba(0, 122, 255, 0.06);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
+  background: var(--c-card);
+}
+
+[data-theme="dark"] .el-card.sci-fi-card {
+  border: 1px solid rgba(10, 132, 255, 0.15);
+  box-shadow: 0 0 12px rgba(10, 132, 255, 0.08);
 }
 
 /* --- Active monitoring pulse --- */
@@ -129,7 +182,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #34C759;
+  background: var(--c-success);
   box-shadow: 0 0 6px rgba(52, 199, 89, 0.6);
   animation: pulse 2s ease-in-out infinite;
 }
@@ -138,7 +191,7 @@
   50% { box-shadow: 0 0 12px rgba(52, 199, 89, 0.8), 0 0 24px rgba(52, 199, 89, 0.4); }
 }
 
-/* --- Data flow lines (horizontal) --- */
+/* --- Data flow lines --- */
 .data-flow-line {
   position: relative;
   overflow: hidden;
@@ -150,7 +203,7 @@
   left: -100%;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--c-primary, #007AFF), transparent);
+  background: linear-gradient(90deg, transparent, var(--c-primary), transparent);
   animation: flowRight 3s linear infinite;
 }
 @keyframes flowRight {
@@ -164,6 +217,13 @@
   box-shadow:
     inset 0 0 20px rgba(0, 180, 255, 0.05),
     0 0 10px rgba(0, 180, 255, 0.1);
+}
+
+[data-theme="dark"] .hologram {
+  border: 1px solid rgba(10, 132, 255, 0.3);
+  box-shadow:
+    inset 0 0 20px rgba(10, 132, 255, 0.08),
+    0 0 12px rgba(10, 132, 255, 0.15);
 }
 
 @media (prefers-reduced-motion: reduce) {

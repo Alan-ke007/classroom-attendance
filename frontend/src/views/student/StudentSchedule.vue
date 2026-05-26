@@ -146,9 +146,9 @@ onMounted(async () => {
 
 <style scoped>
 .schedule-header { display: flex; justify-content: space-between; align-items: center; }
-.title { font-size: 18px; font-weight: 600; }
+.title { font-size: 18px; font-weight: 600; color: var(--c-text); }
 .header-right { display: flex; align-items: center; gap: 12px; }
-.week-info { font-size: 14px; color: #909399; }
+.week-info { font-size: 14px; color: var(--c-text-tertiary); }
 
 .timetable-wrapper { overflow-x: auto; }
 .timetable {
@@ -156,40 +156,40 @@ onMounted(async () => {
   font-size: 13px; min-width: 800px;
 }
 .timetable th {
-  background: #007AFF; color: #fff; padding: 10px 4px;
+  background: var(--c-primary); color: #fff; padding: 10px 4px;
   text-align: center; font-weight: 500; width: 13%;
 }
-.timetable th.today { background: #0055CC; }
+.timetable th.today { background: var(--c-primary-dark); }
 .timetable th.time-col { width: 9%; }
 .date-sm { font-size: 11px; opacity: 0.8; }
 
 .time-cell {
   text-align: center; padding: 8px 4px;
-  background: #f8fafc; border: 1px solid #ebeef5;
+  background: var(--c-bg-alt); border: 1px solid var(--c-border);
   vertical-align: middle;
 }
-.slot-num { font-size: 12px; font-weight: 600; color: #606266; }
-.slot-time { font-size: 11px; color: #909399; }
+.slot-num { font-size: 12px; font-weight: 600; color: var(--c-text-secondary); }
+.slot-time { font-size: 11px; color: var(--c-text-tertiary); }
 
 .course-cell {
-  border: 1px solid #ebeef5; padding: 3px;
+  border: 1px solid var(--c-border); padding: 3px;
   width: 13%; height: 80px; vertical-align: top;
 }
-.course-cell.today { background: #f0f7ff; }
+.course-cell.today { background: var(--c-primary-bg); }
 
 .course-block {
-  background: linear-gradient(135deg, #ecf5ff, #d9ecff);
-  border-left: 3px solid #409EFF;
+  background: linear-gradient(135deg, var(--c-primary-bg), rgba(0,122,255,0.08));
+  border-left: 3px solid var(--c-primary);
   border-radius: 4px; padding: 4px 6px;
   margin-bottom: 2px; cursor: pointer;
   transition: all .2s;
 }
-.course-block:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-.cb-name { font-size: 12px; font-weight: 600; color: #303133; }
-.cb-room { font-size: 11px; color: #606266; }
-.cb-teacher { font-size: 10px; color: #909399; }
+.course-block:hover { transform: translateY(-1px); box-shadow: 0 2px 6px var(--c-shadow); }
+.cb-name { font-size: 12px; font-weight: 600; color: var(--c-text); }
+.cb-room { font-size: 11px; color: var(--c-text-secondary); }
+.cb-teacher { font-size: 10px; color: var(--c-text-tertiary); }
 
-.cd-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.cd-row { display: flex; padding: 8px 0; border-bottom: 1px solid var(--c-border-light); }
 .cd-row:last-child { border-bottom: none; }
-.cd-label { width: 80px; color: #909399; font-size: 13px; }
+.cd-label { width: 80px; color: var(--c-text-tertiary); font-size: 13px; }
 </style>

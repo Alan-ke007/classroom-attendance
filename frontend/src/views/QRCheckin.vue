@@ -18,7 +18,7 @@
             <canvas ref="qrCanvas" width="260" height="260" />
             <div class="qr-info">
               <el-tag type="success" size="large">{{ countdown }} 秒后过期</el-tag>
-              <p style="margin-top: 8px; color: #909399;">课程：{{ qrCourseName }}</p>
+              <p style="margin-top: 8px; color: var(--c-text-tertiary);">课程：{{ qrCourseName }}</p>
             </div>
           </div>
         </el-card>
@@ -110,6 +110,6 @@ onBeforeUnmount(() => clearInterval(countdownTimer))
 <style scoped>
 .qr-display { margin-top: 20px; text-align: center; }
 .qr-info { margin-top: 12px; }
-.empty-hint { text-align: center; padding: 60px 0; color: #909399; }
+.empty-hint { text-align: center; padding: 60px 0; color: var(--c-text-tertiary); }
 .empty-hint p { margin-top: 12px; font-size: 14px; }
 </style>

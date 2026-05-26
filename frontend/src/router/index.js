@@ -118,6 +118,16 @@ const routes = [
         path: 'chat',
         name: 'ChatPanel',
         component: () => import('@/views/chat/ChatPanel.vue')
+      },
+      {
+        path: 'user',
+        name: 'UserManagement',
+        component: () => import('@/views/UserManagement.vue')
+      },
+      {
+        path: 'log',
+        name: 'LogManagement',
+        component: () => import('@/views/LogManagement.vue')
       }
     ]
   },

@@ -19,9 +19,6 @@
           :default-active="activeMenu"
           :default-openeds="openedMenus"
           router
-          background-color="#2c2c2e"
-          text-color="#bfcbd9"
-          active-text-color="#007AFF"
           @select="onMenuSelect"
         >
           <el-menu-item index="/dashboard">
@@ -91,6 +88,16 @@
             <span>聊天消息</span>
             <el-badge v-if="unreadCount > 0" :value="unreadCount" class="chat-badge" />
           </el-menu-item>
+
+          <el-menu-item v-if="userInfo?.role === 'admin'" index="/dashboard/user">
+            <el-icon><UserFilled /></el-icon>
+            <span>用户管理</span>
+          </el-menu-item>
+
+          <el-menu-item v-if="userInfo?.role === 'admin'" index="/dashboard/log">
+            <el-icon><Document /></el-icon>
+            <span>操作日志</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -112,6 +119,7 @@
               </div>
             </div>
             <div class="user-info">
+              <ThemeToggle />
               <el-dropdown trigger="click">
                 <span class="user-name">
                   <el-avatar :size="28" :src="avatarUrl" />
@@ -134,7 +142,7 @@
 
         <!-- 主内容区 -->
         <el-main style="position: relative;">
-          <ParticleBackground mode="dataflow" color="#007AFF" position-type="absolute" />
+          <ParticleBackground mode="dataflow" :color="isDark ? '#0A84FF' : '#007AFF'" position-type="absolute" />
           <router-view />
         </el-main>
       </el-container>
@@ -161,11 +169,14 @@ import {
   ChatDotRound,
 } from '@element-plus/icons-vue'
 import { getUnreadCount } from '@/api/chat'
+import { useTheme } from '@/composables/useTheme'
 import ParticleBackground from '@/components/sci-fi/ParticleBackground.vue'
 import ProfileDialog from '@/components/ProfileDialog.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { isDark } = useTheme()
 const userInfo = ref(null)
 const unreadCount = ref(0)
 const showProfile = ref(false)
@@ -253,16 +264,20 @@ const handleLogout = () => {
 <style scoped>
 .dashboard {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: transparent;
 }
 
 /* ========== 侧边栏 ========== */
 .el-aside {
-  background: linear-gradient(180deg, #1c1c1e 0%, #2c2c2e 100%);
-  color: #fff;
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border);
+  color: var(--c-text);
   overflow-x: hidden;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: var(--c-glass-shadow);
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+              background-color 0.3s ease;
 }
 
 .logo {
@@ -270,15 +285,15 @@ const handleLogout = () => {
   align-items: center;
   gap: 10px;
   padding: 16px 18px;
-  background: rgba(0, 0, 0, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--c-glass-bg);
+  border-bottom: 1px solid var(--c-glass-border);
 }
 .logo-icon svg { display: block; width: 32px; height: 32px; }
 .logo-text h3 {
-  margin: 0; color: #fff; font-size: 15px; font-weight: 600; line-height: 1.2;
+  margin: 0; color: var(--c-text); font-size: 15px; font-weight: 600; line-height: 1.2;
 }
 .logo-text span {
-  font-size: 11px; color: rgba(255, 255, 255, 0.5); font-weight: 400;
+  font-size: 11px; color: var(--c-text-tertiary); font-weight: 400;
 }
 .el-menu {
   border-right: none;
@@ -289,16 +304,23 @@ const handleLogout = () => {
   transition: all 0.25s ease;
   margin: 2px 8px;
   border-radius: 8px;
+  color: var(--c-text-secondary) !important;
 }
 :deep(.el-menu-item:hover),
 :deep(.el-sub-menu__title:hover) {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: var(--c-primary-bg) !important;
+  color: var(--c-primary) !important;
 }
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, rgba(64, 158, 255, 0.25), rgba(64, 158, 255, 0.08)) !important;
-  color: #409eff !important;
+  background: linear-gradient(90deg, var(--c-primary-bg), transparent) !important;
+  color: var(--c-primary) !important;
   font-weight: 600;
-  border-radius: 8px;
+}
+:deep(.el-sub-menu .el-menu) {
+  background: transparent !important;
+}
+:deep(.el-sub-menu .el-menu .el-menu-item) {
+  padding-left: 50px !important;
 }
 
 /* ========== 遮罩层 ========== */
@@ -308,11 +330,14 @@ const handleLogout = () => {
 
 /* ========== 顶部栏 ========== */
 .el-header {
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 1px 0 var(--c-glass-border);
   padding: 0 16px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--c-glass-border);
   animation: slideDown 0.5s ease-out;
+  transition: background-color 0.3s ease;
 }
 
 @keyframes slideDown {
@@ -351,7 +376,7 @@ const handleLogout = () => {
   display: block;
   width: 100%;
   height: 2px;
-  background: #606266;
+  background: var(--c-text-secondary);
   border-radius: 2px;
   transition: all 0.3s ease;
   transform-origin: center;
@@ -367,16 +392,17 @@ const handleLogout = () => {
 
 :deep(.el-breadcrumb__inner) {
   font-weight: 400;
-  color: #606266;
+  color: var(--c-text-secondary) !important;
   transition: all 0.3s ease;
 }
 :deep(.el-breadcrumb__inner:hover) {
-  color: #409eff;
+  color: var(--c-primary) !important;
 }
 
 .user-info {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .user-name {
@@ -384,17 +410,16 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #606266;
+  color: var(--c-text-secondary);
   font-size: 14px;
   padding: 6px 12px;
   border-radius: 4px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--transition);
 }
 .user-name:hover {
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--c-primary-bg);
+  color: var(--c-primary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
 }
 .user-name-text {
   display: inline;
@@ -414,10 +439,11 @@ const handleLogout = () => {
 
 /* ========== 下拉菜单 ========== */
 :deep(.el-dropdown-menu) {
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e4e7ed;
+  border-radius: var(--radius-md);
+  background: var(--c-card);
+  border: 1px solid var(--c-border);
   padding: 6px;
+  box-shadow: var(--shadow-lg);
   animation: scaleIn 0.3s ease-out;
 }
 @keyframes scaleIn {
@@ -428,10 +454,11 @@ const handleLogout = () => {
   border-radius: 4px;
   transition: all 0.3s ease;
   padding: 8px 12px;
+  color: var(--c-text-secondary);
 }
 :deep(.el-dropdown-menu__item:hover) {
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--c-primary-bg);
+  color: var(--c-primary);
   transform: translateX(4px);
 }
 
@@ -466,7 +493,7 @@ const handleLogout = () => {
     position: fixed;
     inset: 0;
     z-index: 1040;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     animation: fadeIn 0.25s ease;
   }
 

@@ -180,7 +180,22 @@ function beforeAvatarUpload(file) {
 .profile-body { padding: 0 8px; }
 .profile-avatar { text-align: center; margin-bottom: 20px; }
 .avatar-uploader { cursor: pointer; display: inline-block; }
-.avatar-tip { font-size: 12px; color: #007AFF; margin-top: 6px; }
+.avatar-tip { font-size: 12px; color: var(--c-primary); margin-top: 6px; }
 .profile-form { margin-top: 8px; }
-:deep(.el-divider__text) { font-size: 13px; color: #86868b; }
+:deep(.el-divider__text) { font-size: 13px; color: var(--c-text-tertiary); }
+:deep(.el-dialog) {
+  --el-dialog-bg-color: var(--c-glass-bg);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--c-glass-shadow);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+:deep(.el-dialog__title) {
+  color: var(--c-text);
+  font-weight: 600;
+}
+:deep(.el-dialog__body) {
+  color: var(--c-text-secondary);
+}
 </style>
