@@ -13,10 +13,10 @@ const { scene, camera, renderer } = useTresContext()
 const cleanupFns = []
 
 onMounted(() => {
-  // --- 雾 ---
-  scene.value.fog = new THREE.Fog('#0a0a1a', 25, 55)
+  // --- Fog ---
+  scene.value.fog = new THREE.Fog('#0D0D0D', 25, 55)
 
-  // --- 手动创建 OrbitControls (避免 @tresjs/cientos 组件导致自定义元素渲染崩溃) ---
+  // --- OrbitControls ---
   if (renderer?.value?.domElement) {
     const controls = new THREE.OrbitControls(camera.value, renderer.value.domElement)
     controls.enableDamping = true
@@ -31,39 +31,39 @@ onMounted(() => {
     cleanupFns.push(() => controls.dispose())
   }
 
-  // --- 灯光 ---
-  const ambient = new THREE.AmbientLight(0xffffff, 0.45)
+  // --- Lights ---
+  const ambient = new THREE.AmbientLight(0xffffff, 0.40)
   const dirLight = new THREE.DirectionalLight(0xffffff, 1.0)
   dirLight.position.set(15, 25, 10)
-  const hemi = new THREE.HemisphereLight('#87CEEB', '#362c2c', 0.4)
+  const hemi = new THREE.HemisphereLight('#00E5FF', '#1a0a2e', 0.35)
   scene.value.add(ambient, dirLight, hemi)
   cleanupFns.push(() => scene.value.remove(ambient, dirLight, hemi))
 
-  // --- 网格 ---
-  const grid = new THREE.GridHelper(42, 22, '#007AFF', '#2a2a3e')
+  // --- Grid ---
+  const grid = new THREE.GridHelper(42, 22, '#00E5FF', '#1a1a1a')
   scene.value.add(grid)
   cleanupFns.push(() => { scene.value.remove(grid); grid.dispose() })
 
-  // --- 热力图地面 ---
+  // --- Ground with heatmap ---
   const groundGeo = new THREE.PlaneGeometry(42, 42)
   const heatTex = generateHeatTexture()
   const groundMat = heatTex
-    ? new THREE.MeshStandardMaterial({ map: heatTex, color: '#1a1a2e', roughness: 0.85, metalness: 0.15 })
-    : new THREE.MeshStandardMaterial({ color: '#1a1a2e', roughness: 0.85, metalness: 0.15 })
+    ? new THREE.MeshStandardMaterial({ map: heatTex, color: '#0D0D1A', roughness: 0.85, metalness: 0.15 })
+    : new THREE.MeshStandardMaterial({ color: '#0D0D1A', roughness: 0.85, metalness: 0.15 })
   const ground = new THREE.Mesh(groundGeo, groundMat)
   ground.rotation.x = -Math.PI / 2
   ground.position.y = -0.05
   scene.value.add(ground)
   cleanupFns.push(() => { scene.value.remove(ground); groundGeo.dispose(); groundMat.dispose() })
 
-  // --- 建筑群 ---
+  // --- Buildings ---
   const buildingMeshes = []
   buildings.forEach(b => {
     const height = 0.5 + (b.size[1] - 0.5) * Math.max(0.3, b.attendanceRate)
     const color = new THREE.Color(getRateColor(b.attendanceRate))
     const geo = new THREE.BoxGeometry(b.size[0], height, b.size[2])
     const mat = new THREE.MeshStandardMaterial({
-      color, emissive: color, emissiveIntensity: 0.12, metalness: 0.15, roughness: 0.75
+      color, emissive: color, emissiveIntensity: 0.15, metalness: 0.15, roughness: 0.70
     })
     const mesh = new THREE.Mesh(geo, mat)
     mesh.position.set(b.position[0], b.position[1] + height / 2, b.position[2])
@@ -71,9 +71,9 @@ onMounted(() => {
     mesh.receiveShadow = true
     mesh.userData = { buildingData: b }
 
-    // 顶部发光线框
+    // Wireframe edges
     const edgeGeo = new THREE.EdgesGeometry(geo)
-    const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.6 })
+    const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65 })
     const edgeLine = new THREE.LineSegments(edgeGeo, edgeMat)
     edgeLine.position.copy(mesh.position)
     mesh.add(edgeLine)
@@ -83,14 +83,14 @@ onMounted(() => {
     cleanupFns.push(() => { scene.value.remove(mesh); geo.dispose(); mat.dispose(); edgeGeo.dispose(); edgeMat.dispose() })
   })
 
-  // --- 粒子系统 ---
+  // --- Particles ---
   const pd = initParticles()
   const pointsGeo = new THREE.BufferGeometry()
   pointsGeo.setAttribute('position', new THREE.BufferAttribute(pd.positions, 3))
   const pointsMat = new THREE.PointsMaterial({
     size: 0.2,
-    color: new THREE.Color('#00D4FF'),
-    transparent: true, opacity: 0.7,
+    color: new THREE.Color('#00E5FF'),
+    transparent: true, opacity: 0.75,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   })
@@ -99,7 +99,7 @@ onMounted(() => {
   const velocities = pd.velocities
   cleanupFns.push(() => { scene.value.remove(points); pointsGeo.dispose(); pointsMat.dispose() })
 
-  // --- 建筑间路径 ---
+  // --- Paths between buildings ---
   const seen = new Set()
   particlePaths.forEach(p => {
     const key = [p.from, p.to].sort().join('-')
@@ -111,10 +111,10 @@ onMounted(() => {
     const angle = Math.atan2(dx, dz)
     const midX = (a.position[0] + b.position[0]) / 2
     const midZ = (a.position[2] + b.position[2]) / 2
-    const pathGeo = new THREE.PlaneGeometry(length, 0.35)
+    const pathGeo = new THREE.PlaneGeometry(length, 0.40)
     const pathMat = new THREE.MeshBasicMaterial({
       color: getRateColor(Math.min(a.attendanceRate, b.attendanceRate)),
-      transparent: true, opacity: 0.3, depthWrite: false
+      transparent: true, opacity: 0.35, depthWrite: false
     })
     const pathPlane = new THREE.Mesh(pathGeo, pathMat)
     pathPlane.position.set(midX, 0.02, midZ)
@@ -123,7 +123,7 @@ onMounted(() => {
     cleanupFns.push(() => { scene.value.remove(pathPlane); pathGeo.dispose(); pathMat.dispose() })
   })
 
-  // --- 渲染循环 ---
+  // --- Render loop ---
   const { onRender } = useLoop()
   onRender(({ delta }) => {
     if (!points) return
@@ -171,15 +171,15 @@ onUnmounted(() => {
   cleanupFns.forEach(fn => fn())
 })
 
-// --- helpers ---
+// --- Heat texture generator ---
 function generateHeatTexture() {
   const size = 1024
   const canvas = document.createElement('canvas')
   canvas.width = size; canvas.height = size
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#0f0f1a'; ctx.fillRect(0, 0, size, size)
+  ctx.fillStyle = '#0A0A14'; ctx.fillRect(0, 0, size, size)
   const step = size / 22
-  ctx.strokeStyle = 'rgba(0, 122, 255, 0.04)'; ctx.lineWidth = 1
+  ctx.strokeStyle = 'rgba(0, 229, 255, 0.05)'; ctx.lineWidth = 1
   for (let i = 0; i <= 22; i++) {
     ctx.beginPath(); ctx.moveTo(i * step, 0); ctx.lineTo(i * step, size); ctx.stroke()
     ctx.beginPath(); ctx.moveTo(0, i * step); ctx.lineTo(size, i * step); ctx.stroke()
@@ -191,9 +191,9 @@ function generateHeatTexture() {
     const intensity = 1 - b.attendanceRate
     const radius = 60 + intensity * 120
     const gradient = ctx.createRadialGradient(tx, ty, 0, tx, ty, radius)
-    gradient.addColorStop(0, `rgba(0,122,255,${intensity * 0.5})`)
-    gradient.addColorStop(0.6, `rgba(0,122,255,${intensity * 0.15})`)
-    gradient.addColorStop(1, 'rgba(0,122,255,0)')
+    gradient.addColorStop(0, `rgba(0, 229, 255, ${intensity * 0.55})`)
+    gradient.addColorStop(0.6, `rgba(0, 229, 255, ${intensity * 0.18})`)
+    gradient.addColorStop(1, 'rgba(0, 229, 255, 0)')
     ctx.fillStyle = gradient
     ctx.beginPath(); ctx.arc(tx, ty, radius, 0, Math.PI * 2); ctx.fill()
   })

@@ -50,7 +50,7 @@
         </el-form-item>
       </el-form>
       
-      <el-table :data="attendanceList" style="width: 100%" v-loading="loading">
+      <div class="table-wrapper"><el-table :data="attendanceList" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="studentName" label="学生姓名" />
         <el-table-column prop="className" label="班级" />
@@ -71,8 +71,8 @@
             <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
-      </el-table>
-      
+      </el-table></div>
+
       <el-pagination
         v-model:current-page="pageNum"
         v-model:page-size="pageSize"
@@ -86,7 +86,7 @@
     </el-card>
     
     <!-- 添加/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" :width="isMobile ? '95%' : '600px'">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="学生" prop="studentId">
           <el-select v-model="form.studentId" placeholder="请选择学生" style="width: 100%">
@@ -125,11 +125,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, Document } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 
+const isMobile = computed(() => window.innerWidth < 768)
 const loading = ref(false)
 const submitLoading = ref(false)
 const formRef = ref(null)
@@ -338,14 +339,12 @@ const handleExport = async () => {
 </script>
 
 <style scoped>
-.attendance-list {
-  padding: 20px;
-}
+.attendance-list { padding: 20px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.table-wrapper { overflow-x: auto; }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+@media (max-width: 768px) {
+  .attendance-list { padding: 12px; }
 }
 
 .search-form {

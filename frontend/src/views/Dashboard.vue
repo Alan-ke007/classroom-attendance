@@ -8,7 +8,7 @@
       <el-aside :class="{ 'sidebar-open': sidebarOpen }" width="200px">
         <div class="logo">
           <div class="logo-icon">
-            <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><circle cx="16" cy="14" r="6" stroke="#fff" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#007AFF"/><stop offset="100%" stop-color="#0055CC"/></linearGradient></defs></svg>
+            <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><circle cx="16" cy="14" r="6" stroke="#fff" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#E040FB"/></linearGradient></defs></svg>
           </div>
           <div class="logo-text">
             <h3>智课考勤</h3>
@@ -94,6 +94,11 @@
             <span>用户管理</span>
           </el-menu-item>
 
+          <el-menu-item index="/dashboard/announcement">
+            <el-icon><Bell /></el-icon>
+            <span>公告管理</span>
+          </el-menu-item>
+
           <el-menu-item v-if="userInfo?.role === 'admin'" index="/dashboard/log">
             <el-icon><Document /></el-icon>
             <span>操作日志</span>
@@ -142,9 +147,13 @@
 
         <!-- 主内容区 -->
         <el-main style="position: relative;">
-          <ParticleBackground mode="dataflow" :color="isDark ? '#0A84FF' : '#007AFF'" position-type="absolute" />
+          <ParticleBackground mode="dataflow" :color="isDark ? '#00E5FF' : '#00B8D4'" position-type="absolute" />
           <router-view />
         </el-main>
+
+        <el-footer class="app-footer">
+          &#169; {{ currentYear }} 智课考勤 · Smart Classroom Attendance
+        </el-footer>
       </el-container>
     </el-container>
   </div>
@@ -182,6 +191,7 @@ const unreadCount = ref(0)
 const showProfile = ref(false)
 const sidebarOpen = ref(false)
 const avatarUrl = ref('')
+const currentYear = new Date().getFullYear()
 let unreadTimer = null
 
 const activeMenu = computed(() => route.path)
@@ -267,17 +277,14 @@ const handleLogout = () => {
   background: transparent;
 }
 
-/* ========== 侧边栏 ========== */
+/* ========== Sidebar — Brutalist ========== */
 .el-aside {
-  background: var(--c-glass-bg);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-right: 1px solid var(--c-glass-border);
+  background: var(--c-sidebar);
+  border-right: var(--bw) solid var(--c-border);
   color: var(--c-text);
   overflow-x: hidden;
-  box-shadow: var(--c-glass-shadow);
-  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-              background-color 0.3s ease;
+  box-shadow: 4px 0 0 0 rgba(0,0,0,0.3);
+  transition: transform 0.15s ease;
 }
 
 .logo {
@@ -285,37 +292,46 @@ const handleLogout = () => {
   align-items: center;
   gap: 10px;
   padding: 16px 18px;
-  background: var(--c-glass-bg);
-  border-bottom: 1px solid var(--c-glass-border);
+  background: var(--c-bg-alt);
+  border-bottom: var(--bw) solid var(--c-border);
 }
 .logo-icon svg { display: block; width: 32px; height: 32px; }
 .logo-text h3 {
-  margin: 0; color: var(--c-text); font-size: 15px; font-weight: 600; line-height: 1.2;
+  margin: 0; color: var(--c-text); font-size: 15px; font-weight: 700; line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 .logo-text span {
-  font-size: 11px; color: var(--c-text-tertiary); font-weight: 400;
+  font-size: 10px; color: var(--c-text-tertiary); font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em;
 }
+
 .el-menu {
   border-right: none;
   background: transparent;
 }
+
 :deep(.el-menu-item),
 :deep(.el-sub-menu__title) {
-  transition: all 0.25s ease;
-  margin: 2px 8px;
-  border-radius: 8px;
+  transition: all 0.1s ease;
+  margin: 1px 4px;
+  border-radius: var(--radius-md);
   color: var(--c-text-secondary) !important;
+  border-left: 3px solid transparent;
 }
+
 :deep(.el-menu-item:hover),
 :deep(.el-sub-menu__title:hover) {
-  background: var(--c-primary-bg) !important;
-  color: var(--c-primary) !important;
+  background: var(--c-accent-bg) !important;
+  color: var(--c-text) !important;
 }
+
 :deep(.el-menu-item.is-active) {
-  background: linear-gradient(90deg, var(--c-primary-bg), transparent) !important;
-  color: var(--c-primary) !important;
-  font-weight: 600;
+  background: var(--c-accent-bg) !important;
+  color: var(--c-accent) !important;
+  font-weight: 700;
+  border-left: 3px solid var(--c-accent);
 }
+
 :deep(.el-sub-menu .el-menu) {
   background: transparent !important;
 }
@@ -323,26 +339,15 @@ const handleLogout = () => {
   padding-left: 50px !important;
 }
 
-/* ========== 遮罩层 ========== */
-.sidebar-overlay {
-  display: none;
-}
+/* ========== Overlay ========== */
+.sidebar-overlay { display: none; }
 
-/* ========== 顶部栏 ========== */
+/* ========== Header — Brutalist ========== */
 .el-header {
-  background: var(--c-glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: 0 1px 0 var(--c-glass-border);
+  background: var(--c-header);
   padding: 0 16px;
-  border-bottom: 1px solid var(--c-glass-border);
-  animation: slideDown 0.5s ease-out;
-  transition: background-color 0.3s ease;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  border-bottom: var(--bw-bold) solid var(--c-border);
+  transition: background-color 0.15s ease;
 }
 
 .header-content {
@@ -358,17 +363,18 @@ const handleLogout = () => {
   gap: 12px;
 }
 
-/* ========== 汉堡菜单按钮 ========== */
+/* Hamburger */
 .hamburger {
   display: none;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   padding: 4px;
-  background: none;
-  border: none;
+  background: var(--c-bg-alt);
+  border: var(--bw) solid var(--c-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
   z-index: 1100;
 }
@@ -377,13 +383,10 @@ const handleLogout = () => {
   width: 100%;
   height: 2px;
   background: var(--c-text-secondary);
-  border-radius: 2px;
-  transition: all 0.3s ease;
-  transform-origin: center;
 }
 
 .breadcrumb {
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -391,12 +394,12 @@ const handleLogout = () => {
 }
 
 :deep(.el-breadcrumb__inner) {
-  font-weight: 400;
+  font-weight: 500;
   color: var(--c-text-secondary) !important;
-  transition: all 0.3s ease;
 }
+
 :deep(.el-breadcrumb__inner:hover) {
-  color: var(--c-primary) !important;
+  color: var(--c-accent) !important;
 }
 
 .user-info {
@@ -411,69 +414,45 @@ const handleLogout = () => {
   align-items: center;
   gap: 5px;
   color: var(--c-text-secondary);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
   padding: 6px 12px;
-  border-radius: 4px;
-  transition: all var(--transition);
-}
-.user-name:hover {
-  background: var(--c-primary-bg);
-  color: var(--c-primary);
-  transform: translateY(-1px);
-}
-.user-name-text {
-  display: inline;
+  border: var(--bw) solid transparent;
+  border-radius: var(--radius-md);
+  transition: all 0.1s ease;
 }
 
-/* ========== 主内容区 ========== */
+.user-name:hover {
+  background: var(--c-accent-bg);
+  color: var(--c-accent);
+  border-color: var(--c-accent-border);
+}
+
+.user-name-text { display: inline; }
+
+/* ========== Main ========== */
 .el-main {
   padding: 20px;
   background: transparent;
-  animation: fadeIn 0.5s ease-out 0.2s both;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* ========== Footer ========== */
+.app-footer {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-tertiary);
+  padding: 14px 20px;
+  background: var(--c-bg-alt);
+  border-top: var(--bw) solid var(--c-border);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-/* ========== 下拉菜单 ========== */
-:deep(.el-dropdown-menu) {
-  border-radius: var(--radius-md);
-  background: var(--c-card);
-  border: 1px solid var(--c-border);
-  padding: 6px;
-  box-shadow: var(--shadow-lg);
-  animation: scaleIn 0.3s ease-out;
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
-:deep(.el-dropdown-menu__item) {
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  padding: 8px 12px;
-  color: var(--c-text-secondary);
-}
-:deep(.el-dropdown-menu__item:hover) {
-  background: var(--c-primary-bg);
-  color: var(--c-primary);
-  transform: translateX(4px);
-}
-
-.chat-badge { margin-left: auto; }
-
-/* ================================================================
-   响应式设计 — 移动端
-   ================================================================ */
+/* ========== Mobile ========== */
 @media (max-width: 768px) {
-  /* 汉堡菜单可见 */
-  .hamburger {
-    display: flex;
-  }
+  .hamburger { display: flex; }
 
-  /* 侧边栏默认隐藏，滑入时显示 */
   .el-aside {
     position: fixed;
     top: 0;
@@ -483,41 +462,24 @@ const handleLogout = () => {
     transform: translateX(-100%);
     width: 200px !important;
   }
-  .el-aside.sidebar-open {
-    transform: translateX(0);
-  }
+  .el-aside.sidebar-open { transform: translateX(0); }
 
-  /* 遮罩层 */
   .sidebar-overlay {
     display: block;
     position: fixed;
     inset: 0;
     z-index: 1040;
-    background: rgba(0, 0, 0, 0.55);
-    animation: fadeIn 0.25s ease;
+    background: rgba(0, 0, 0, 0.7);
   }
 
-  /* 菜单文字始终显示 */
   :deep(.el-menu-item span),
   :deep(.el-sub-menu__title span) {
     display: inline !important;
   }
 
-  /* 顶部栏缩减 */
-  .el-header {
-    padding: 0 12px;
-  }
-  .user-name-text {
-    display: none;
-  }
-  .breadcrumb {
-    max-width: 140px;
-    font-size: 13px;
-  }
-
-  /* 主区域减 padding */
-  .el-main {
-    padding: 12px;
-  }
+  .el-header { padding: 0 12px; }
+  .user-name-text { display: none; }
+  .breadcrumb { max-width: 140px; font-size: 12px; }
+  .el-main { padding: 12px; }
 }
 </style>

@@ -11,12 +11,17 @@
         </div>
       </template>
       
-      <el-table :data="studentList" style="width: 100%" v-loading="loading">
+      <div class="table-wrapper"><el-table :data="studentList" style="width: 100%" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="studentNo" label="学号" width="120" />
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="gender" label="性别" width="80" />
         <el-table-column prop="className" label="班级" />
+        <el-table-column label="学风分" width="100">
+          <template #default="{ row }">
+            <el-tag :type="creditTagType(row.creditScore)" size="small">{{ row.creditScore ?? 100 }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="phone" label="手机号" width="130" />
         <el-table-column label="操作" width="160">
           <template #default="scope">
@@ -24,8 +29,8 @@
             <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
-      </el-table>
-      
+      </el-table></div>
+
       <el-pagination
         v-model:current-page="pageNum"
         v-model:page-size="pageSize"
@@ -39,7 +44,7 @@
     </el-card>
     
     <!-- 添加/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" :width="isMobile ? '95%' : '500px'">
       <el-form :model="form" :rules="formRules" ref="formRef" label-width="100px">
         <el-form-item label="学号" prop="studentNo">
           <el-input v-model="form.studentNo" placeholder="请输入学号" />
@@ -71,10 +76,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+
+const isMobile = computed(() => window.innerWidth < 768)
 
 const loading = ref(false)
 const submitLoading = ref(false)
@@ -193,17 +200,23 @@ const handleDelete = async (row) => {
   }
 }
 
+const creditTagType = (score) => {
+  const s = score ?? 100
+  if (s >= 150) return 'success'
+  if (s >= 120) return ''
+  if (s >= 80) return 'warning'
+  return 'danger'
+}
+
 </script>
 
 <style scoped>
-.student-management {
-  padding: 20px;
-}
+.student-management { padding: 20px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.table-wrapper { overflow-x: auto; }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+@media (max-width: 768px) {
+  .student-management { padding: 12px; }
+  .card-header { flex-direction: column; gap: 8px; align-items: flex-start; }
 }
-
 </style>

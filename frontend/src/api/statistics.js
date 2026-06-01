@@ -22,3 +22,11 @@ export function getStudentAttendanceRanking(classId) {
     params: { classId }
   })
 }
+
+export function getTodaySchedule() {
+  return request({ url: '/statistics/today-schedule', method: 'get' })
+}
+
+export function getPendingTasks() {
+  return request({ url: '/statistics/pending-tasks', method: 'get' })
+}

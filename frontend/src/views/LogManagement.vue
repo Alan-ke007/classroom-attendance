@@ -75,6 +75,15 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="操作时间" width="180" />
+        <el-table-column label="操作" width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <el-popconfirm title="确定删除这条日志吗？" @confirm="handleDelete(row.id)">
+              <template #reference>
+                <el-button type="danger" size="small" text>删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination-wrap">
@@ -93,6 +102,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
 
 const loading = ref(false)
@@ -134,6 +144,14 @@ async function loadLogs() {
   } finally {
     loading.value = false
   }
+}
+
+async function handleDelete(id) {
+  try {
+    await request.delete(`/log/${id}`)
+    ElMessage.success('已删除')
+    loadLogs()
+  } catch (e) { console.error(e) }
 }
 
 onMounted(loadLogs)

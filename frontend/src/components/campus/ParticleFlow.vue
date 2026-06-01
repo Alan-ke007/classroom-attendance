@@ -37,10 +37,10 @@ function createParticles() {
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(posArray), 3))
 
   const material = new THREE.PointsMaterial({
-    size: 0.2,
-    color: new THREE.Color('#00D4FF'),
+    size: 0.22,
+    color: new THREE.Color('#E040FB'),
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.75,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     sizeAttenuation: true

@@ -15,7 +15,7 @@ const props = defineProps({
     default: 'network',
     validator: v => ['network', 'dataflow', 'floating'].includes(v)
   },
-  color: { type: String, default: '#007AFF' },
+  color: { type: String, default: '#00E5FF' },
   positionType: { type: String, default: 'fixed' }
 })
 

@@ -49,9 +49,11 @@ CREATE TABLE IF NOT EXISTS `student` (
     `gender` VARCHAR(10) DEFAULT NULL COMMENT '性别',
     `class_id` BIGINT DEFAULT NULL COMMENT '班级ID',
     `user_id` BIGINT DEFAULT NULL COMMENT '关联用户ID',
-    `face_image` VARCHAR(255) DEFAULT NULL COMMENT '人脸图片路径',
     `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+    `credit_score` INT DEFAULT 100 COMMENT '学风分',
+    `credit_earned` INT DEFAULT 0 COMMENT '累计加分',
+    `credit_deducted` INT DEFAULT 0 COMMENT '累计减分',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除',
@@ -73,6 +75,8 @@ CREATE TABLE IF NOT EXISTS `course` (
     `start_time` TIME DEFAULT NULL COMMENT '开始时间',
     `end_time` TIME DEFAULT NULL COMMENT '结束时间',
     `week_day` VARCHAR(20) DEFAULT NULL COMMENT '星期（周一/周二...）',
+    `start_week` INT DEFAULT NULL COMMENT '起始周',
+    `end_week` INT DEFAULT NULL COMMENT '结束周',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除',
@@ -230,6 +234,23 @@ CREATE TABLE IF NOT EXISTS `chat_message` (
     KEY `idx_receiver_read` (`receiver_id`, `is_read`),
     KEY `idx_create_time` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='聊天消息表';
+
+-- ========================
+-- 12. 公告表
+-- ========================
+CREATE TABLE IF NOT EXISTS `announcement` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `title` VARCHAR(200) NOT NULL COMMENT '公告标题',
+    `content` TEXT COMMENT '公告内容',
+    `publisher_id` BIGINT DEFAULT NULL COMMENT '发布者ID',
+    `is_pinned` TINYINT DEFAULT 0 COMMENT '是否置顶',
+    `target_role` VARCHAR(20) DEFAULT NULL COMMENT '目标角色',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_publisher_id` (`publisher_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公告表';
 
 -- ========================
 -- 默认数据

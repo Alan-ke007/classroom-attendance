@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 课堂考勤系统启动类
  */
 @SpringBootApplication
-@MapperScan("com.classroom.attendance.mapper")
+@MapperScan("com.classroom.attendance.modules")
 @EnableScheduling
 public class ClassroomAttendanceApplication {
 

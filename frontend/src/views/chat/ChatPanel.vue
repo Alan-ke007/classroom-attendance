@@ -82,8 +82,31 @@
   </div>
 
   <!-- 新对话弹窗 -->
-  <el-dialog v-model="showNewChat" title="发起新对话" width="420px" :close-on-click-modal="true" @closed="searchResults=[]; searchKeyword='';">
+  <el-dialog v-model="showNewChat" title="发起新对话" width="460px" :close-on-click-modal="true" @open="onNewChatOpen" @closed="searchResults=[]; searchKeyword=''; suggestedContacts=[];">
     <div class="new-chat-body">
+      <!-- 可能认识的人 -->
+      <div v-if="suggestedContacts.length > 0" class="suggested-section">
+        <div class="section-title">可能认识的人</div>
+        <div class="suggested-list">
+          <div
+            v-for="user in suggestedContacts"
+            :key="user.id"
+            class="search-user-item"
+            @click="startConversation(user)"
+          >
+            <el-avatar :size="36" :src="user.avatar" />
+            <div class="search-user-info">
+              <span class="search-user-name">{{ user.realName || user.username }}</span>
+              <span class="search-user-role">{{ roleLabel(user.role) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分界线 -->
+      <el-divider v-if="suggestedContacts.length > 0" />
+
+      <!-- 搜索其他用户 -->
       <el-input
         v-model="searchKeyword"
         placeholder="搜索用户名或姓名..."
@@ -109,7 +132,7 @@
           <el-avatar :size="36" :src="user.avatar" />
           <div class="search-user-info">
             <span class="search-user-name">{{ user.realName || user.username }}</span>
-            <span class="search-user-role">{{ user.role === 'teacher' ? '教师' : user.role === 'admin' ? '管理员' : '学生' }}</span>
+            <span class="search-user-role">{{ roleLabel(user.role) }}</span>
           </div>
         </div>
       </div>
@@ -121,7 +144,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
-import { getConversations, getMessages, sendMessage as apiSendMessage, markAsRead as apiMarkAsRead, searchUsers } from '@/api/chat'
+import { getConversations, getMessages, sendMessage as apiSendMessage, markAsRead as apiMarkAsRead, searchUsers, getSuggestedContacts } from '@/api/chat'
 import chatSocket from '@/utils/chatSocket'
 
 const myUserId = ref(null)
@@ -139,7 +162,13 @@ const showNewChat = ref(false)
 const searchKeyword = ref('')
 const searchResults = ref([])
 const searchingUsers = ref(false)
+const suggestedContacts = ref([])
 let searchTimer = null
+
+function roleLabel(role) {
+  const map = { admin: '管理员', teacher: '教师', student: '学生' }
+  return map[role] || role
+}
 
 // 本地消息序列号，用于可靠匹配服务端确认
 let msgSeq = 0
@@ -170,6 +199,14 @@ async function doSearch() {
     searchResults.value = res.data || []
   } catch (e) { /* ignore */ }
   finally { searchingUsers.value = false }
+}
+
+async function onNewChatOpen() {
+  suggestedContacts.value = []
+  try {
+    const res = await getSuggestedContacts()
+    suggestedContacts.value = res.data || []
+  } catch (e) { /* ignore */ }
 }
 
 function startConversation(user) {

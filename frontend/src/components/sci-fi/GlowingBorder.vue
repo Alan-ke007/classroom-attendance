@@ -8,11 +8,11 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  colorStart: { type: String, default: '#007AFF' },
-  colorEnd: { type: String, default: '#00D4FF' },
-  thickness: { type: Number, default: 2 },
+  colorStart: { type: String, default: '#00E5FF' },
+  colorEnd: { type: String, default: '#E040FB' },
+  thickness: { type: Number, default: 3 },
   borderRadius: { type: String, default: '12px' },
-  backgroundColor: { type: String, default: 'var(--c-card, #fff)' }
+  backgroundColor: { type: String, default: 'var(--c-card, #161616)' }
 })
 
 const borderStyle = computed(() => ({
@@ -40,10 +40,10 @@ const borderStyle = computed(() => ({
     var(--gb-start),
     var(--gb-end),
     var(--gb-start),
-    #5856D6,
+    #FFD600,
     var(--gb-start)
   );
-  animation: spinBorder 4s linear infinite;
+  animation: spinBorder 3s linear infinite;
   z-index: 0;
 }
 .glowing-border::after {

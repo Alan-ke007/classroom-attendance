@@ -62,30 +62,27 @@ docker-compose up -d --build
 
 ### 步骤1：初始化数据库
 
-**方式A：使用PowerShell脚本**
-```powershell
-.\scripts\utils\init_database.ps1
-```
+在 MySQL 中创建数据库并导入初始化脚本：
 
-**方式B：手动执行SQL**
-```powershell
-mysql -u root -p < scripts\database\init_database.sql
+```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS classroom_attendance DEFAULT CHARACTER SET utf8mb4;"
+mysql -u root -p classroom_attendance < src/main/resources/init_db.sql
 ```
 
 ### 步骤2：配置数据库连接
 
-编辑 `src/main/resources/application.yml`:
-```yaml
-spring:
-  datasource:
-    username: root
-    password: your_password  # 修改为你的密码
+编辑 `src/main/resources/application.yml`，或通过环境变量配置：
+
+```bash
+export SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/classroom_attendance?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&useUnicode=true&connectionCollation=utf8mb4_unicode_ci&allowPublicKeyRetrieval=true
+export SPRING_DATASOURCE_USERNAME=root
+export SPRING_DATASOURCE_PASSWORD=your_password
 ```
 
 ### 步骤3：启动后端服务
 
-```powershell
-# 在项目根目录执行
+```bash
+cd e:/classroom-attendance
 mvn spring-boot:run
 ```
 
@@ -93,24 +90,27 @@ mvn spring-boot:run
 
 ### 步骤4：启动前端服务
 
-```powershell
-# 在新终端执行
-cd frontend
+打开新终端：
+
+```bash
+cd e:/classroom-attendance/frontend
 npm install  # 首次需要安装依赖
 npm run dev
 ```
 
-前端将在 http://localhost:5173 启动
+前端将在 http://localhost:5173 启动（已配置 /api 代理到后端 8080）
 
-### 步骤5：启动算法服务
+### 步骤5：启动算法服务（可选）
 
-```powershell
-# 在新终端执行
-cd algorithm-service
+打开新终端：
+
+```bash
+cd e:/classroom-attendance/algorithm-service
 
 # 创建虚拟环境（首次）
 python -m venv venv
-.\venv\Scripts\Activate
+source venv/Scripts/activate  # Windows Git Bash
+# 或 venv\Scripts\Activate.ps1  # Windows PowerShell
 
 # 安装依赖（首次）
 pip install -r requirements.txt
@@ -131,48 +131,36 @@ python app.py
 
 ## 🔧 方式三：使用启动脚本
 
-Windows用户可以双击运行脚本：
+项目根目录提供了便捷脚本：
 
-### 一键启动所有服务
-```
-scripts\utils\start_all.bat
-```
-
-### 单独启动服务
-- `scripts\utils\start.bat` - 仅启动后端
-- `scripts\utils\check_env.bat` - 检查环境
-
-### 测试算法集成
-```
-scripts\utils\test_algorithm_integration.bat
-```
+| 脚本 | 用途 |
+|------|------|
+| `algorithm-service/run.bat` | 启动算法服务 |
+| `CreateTable.java` | 数据库建表辅助类 |
 
 ---
 
 ## ✅ 验证安装
 
 ### 1. 检查后端
-```powershell
-curl http://localhost:8080/api/class/all
+```bash
+curl http://localhost:8080/api/classmgmt/all
 ```
-应返回JSON数据
+应返回 JSON 数据
 
 ### 2. 检查前端
 浏览器访问 http://localhost:5173，应看到登录页面
 
 ### 3. 检查算法服务
-```powershell
+```bash
 curl http://localhost:5000/health
 ```
 应返回 `{"status": "ok"}`
 
 ### 4. 检查数据库
-```sql
-mysql -u root -p
-USE classroom_attendance;
-SHOW TABLES;
+```bash
+mysql -u root -p -e "USE classroom_attendance; SHOW TABLES;"
 ```
-应看到6张表
 
 ---
 

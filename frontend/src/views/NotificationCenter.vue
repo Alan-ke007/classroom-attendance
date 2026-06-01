@@ -31,6 +31,9 @@
           <div class="notif-content">{{ item.content }}</div>
           <div class="notif-time">{{ item.createTime }}</div>
         </div>
+        <el-button text type="danger" size="small" @click.stop="handleDelete(item)">
+          <el-icon><Delete /></el-icon>
+        </el-button>
       </div>
 
       <el-pagination
@@ -44,7 +47,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Delete } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 
 const activeTab = ref('')
@@ -80,6 +84,15 @@ async function markAllRead() {
     list.value.forEach(n => n.isRead = 1)
     ElMessage.success('已全部标记为已读')
   } catch (e) { console.error(e) }
+}
+
+async function handleDelete(item) {
+  try {
+    await ElMessageBox.confirm('确定删除这条通知吗？', '提示', { type: 'warning' })
+    await request.delete(`/notification/${item.id}`)
+    list.value = list.value.filter(n => n.id !== item.id)
+    ElMessage.success('已删除')
+  } catch (e) { /* cancelled or error */ }
 }
 
 onMounted(loadList)

@@ -23,3 +23,7 @@ export function markAsRead(otherUserId) {
 export function searchUsers(keyword, role) {
   return request.get('/chat/search-users', { params: { keyword, role } })
 }
+
+export function getSuggestedContacts() {
+  return request.get('/chat/suggested-contacts')
+}

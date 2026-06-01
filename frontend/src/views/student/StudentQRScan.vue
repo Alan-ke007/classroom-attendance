@@ -6,11 +6,11 @@
         <div class="scan-hint">
           <div class="scan-icon-wrap">
             <svg viewBox="0 0 64 64" width="64" height="64" fill="none">
-              <rect x="4" y="4" width="24" height="24" rx="4" stroke="#007AFF" stroke-width="2.5"/>
-              <rect x="36" y="4" width="24" height="24" rx="4" stroke="#007AFF" stroke-width="2.5"/>
-              <rect x="4" y="36" width="24" height="24" rx="4" stroke="#007AFF" stroke-width="2.5"/>
-              <rect x="36" y="36" width="24" height="24" rx="4" stroke="#007AFF" stroke-width="2.5"/>
-              <line x1="32" y1="8" x2="32" y2="24" stroke="#007AFF" stroke-width="2" stroke-dasharray="4 4"/>
+              <rect x="4" y="4" width="24" height="24" rx="4" stroke="#00E5FF" stroke-width="2.5"/>
+              <rect x="36" y="4" width="24" height="24" rx="4" stroke="#00E5FF" stroke-width="2.5"/>
+              <rect x="4" y="36" width="24" height="24" rx="4" stroke="#00E5FF" stroke-width="2.5"/>
+              <rect x="36" y="36" width="24" height="24" rx="4" stroke="#00E5FF" stroke-width="2.5"/>
+              <line x1="32" y1="8" x2="32" y2="24" stroke="#00E5FF" stroke-width="2" stroke-dasharray="4 4"/>
             </svg>
           </div>
           <h3>请使用微信小程序扫描教师展示的二维码</h3>

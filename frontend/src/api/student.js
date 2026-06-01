@@ -31,3 +31,11 @@ export function getStudentDashboardStats(studentId) {
 export function getAttendanceStats(params) {
   return request({ url: '/statistics/attendance', method: 'get', params })
 }
+
+export function getCreditScore(studentId) {
+  return request({ url: `/student/credit-score/${studentId}`, method: 'get' })
+}
+
+export function getCreditRanking(classId) {
+  return request({ url: '/statistics/credit-ranking', method: 'get', params: { classId } })
+}

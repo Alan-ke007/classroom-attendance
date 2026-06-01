@@ -30,27 +30,56 @@
         style="margin-bottom: 20px;"
       />
       
-      <el-tag
-        v-if="algorithmServiceStatus === 'online'"
-        type="success"
-        style="margin-bottom: 15px;"
-      >
-        <span class="pulse-dot" style="margin-right: 6px;"></span> 算法服务已连接
-      </el-tag>
-      <el-tag 
-        v-else-if="algorithmServiceStatus === 'offline'" 
-        type="danger" 
-        style="margin-bottom: 15px;"
-      >
-        ✗ 算法服务未连接
-      </el-tag>
-      <el-tag 
-        v-else 
-        type="info" 
-        style="margin-bottom: 15px;"
-      >
-        ? 正在检查算法服务...
-      </el-tag>
+      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+        <el-tag
+          v-if="algorithmServiceStatus === 'online'"
+          type="success"
+        >
+          <span class="pulse-dot" style="margin-right: 6px;"></span> 算法服务已连接
+        </el-tag>
+        <el-tag
+          v-else-if="algorithmServiceStatus === 'offline'"
+          type="danger"
+        >
+          ✗ 算法服务未连接
+        </el-tag>
+        <el-tag
+          v-else
+          type="info"
+        >
+          ? 正在检查算法服务...
+        </el-tag>
+
+        <el-select
+          v-model="selectedClassId"
+          placeholder="选择监控班级"
+          clearable
+          style="width: 200px"
+          @change="onClassChange"
+        >
+          <el-option
+            v-for="c in classList"
+            :key="c.id"
+            :label="c.className"
+            :value="c.id"
+          />
+        </el-select>
+
+        <el-select
+          v-if="selectedClassId && studentList.length > 0"
+          v-model="selectedStudentId"
+          placeholder="选择学生（可选）"
+          clearable
+          style="width: 200px"
+        >
+          <el-option
+            v-for="s in studentList"
+            :key="s.id"
+            :label="s.name"
+            :value="s.id"
+          />
+        </el-select>
+      </div>
       
       <!-- 调试信息 -->
       <el-alert
@@ -172,7 +201,6 @@ import behaviorAlertWS from '@/utils/websocket'
 import request from '@/utils/request'
 
 const videoRef = ref(null)
-const canvasRef = ref(null) // 添加canvas引用
 const monitoring = ref(false)
 const monitorDuration = ref('00:00:00')
 const algorithmServiceStatus = ref('unknown')
@@ -180,6 +208,10 @@ const detecting = ref(false)
 const uploadedImage = ref(null)
 const uploadedImageBase64 = ref(null)
 const mobileCameraInput = ref(null)
+const selectedClassId = ref(null)
+const selectedStudentId = ref(null)
+const classList = ref([])
+const studentList = ref([])
 const monitorStats = ref({
   online: 0,
   abnormal: 0
@@ -412,7 +444,9 @@ async function saveDetectionResults(behaviors) {
   try {
     const detections = behaviors.map(b => ({
       behaviorType: b.type,
-      confidence: b.confidence
+      confidence: b.confidence,
+      classId: selectedClassId.value || undefined,
+      studentId: selectedStudentId.value || undefined
     }))
     await request.post('/behavior/detection/save', detections)
     console.log(`已保存 ${detections.length} 条检测结果到数据库`)
@@ -535,7 +569,29 @@ const connectWebSocket = () => {
 onMounted(() => {
   console.log('组件已挂载，连接WebSocket...')
   connectWebSocket()
+  loadClasses()
 })
+
+async function loadClasses() {
+  try {
+    const res = await request.get('/class/all')
+    classList.value = res.data || []
+  } catch (e) {
+    console.error('加载班级列表失败', e)
+  }
+}
+
+async function onClassChange(classId) {
+  selectedStudentId.value = null
+  studentList.value = []
+  if (!classId) return
+  try {
+    const res = await request.get('/student/byClass', { params: { classId } })
+    studentList.value = res.data || []
+  } catch (e) {
+    console.error('加载学生列表失败', e)
+  }
+}
 
 // 组件卸载时清理
 onUnmounted(() => {

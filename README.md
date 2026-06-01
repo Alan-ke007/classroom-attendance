@@ -8,7 +8,7 @@
 
 **🆕 最新进展 (2026-05-09)**:
 - ✅ **算法模型训练完成** - YOLOv8行为检测模型（mAP@50: 85.9%）
-- ✅ **前端API集成完成** - 人脸识别和行为检测功能已接入真实算法服务
+- ✅ **前端API集成完成** - 行为检测功能已接入真实算法服务
 - ✅ **测试工具就绪** - 提供专用测试页面和自动化测试脚本
 
 ## 技术栈
@@ -54,17 +54,15 @@ classroom-attendance/
 │   │   │   ├── auth.js          # 认证相关API
 │   │   │   └── algorithm.js     # 算法服务API（新增）
 │   │   ├── views/               # 页面组件
-│   │   │   ├── FaceRecognition.vue      # 人脸识别（已集成API）
 │   │   │   ├── BehaviorMonitor.vue      # 行为监控（已集成API）
-│   │   │   └── AlgorithmTest.vue        # 算法测试（新增）
+│   │   │   └── AlgorithmTest.vue        # 算法测试
 │   │   ├── router/              # 路由配置
 │   │   └── utils/               # 工具函数（axios封装）
 │   └── package.json
 ├── algorithm-service/            # Python算法服务
 │   ├── app.py                   # Flask主应用
 │   ├── models/                  # 训练好的YOLOv8模型
-│   │   ├── behavior_best.pt     # 行为检测模型（新训练）
-│   │   └── face_detection.pt    # 人脸检测模型
+│   │   └── behavior_best.pt     # 行为检测模型
 │   ├── runs/train/              # 训练结果和日志
 │   └── requirements.txt         # Python依赖
 ├── pom.xml                       # Maven配置
@@ -240,14 +238,13 @@ python app.py
 - ✅ Dashboard主页
 - ✅ Python算法服务框架
 - ✅ **YOLOv8模型训练** - 行为检测模型（mAP@50: 85.9%）
-- ✅ **前端API集成** - 人脸识别和行为检测功能
+- ✅ **前端API集成** - 行为检测功能
 - ✅ **算法测试工具** - 专用测试页面和自动化脚本
 
 ### 待实现 ⏳
 - ⏳ 学生信息管理
 - ⏳ 课程管理
 - ⏳ 考勤记录保存（将识别结果写入数据库）
-- ⏳ 学生人脸信息录入与匹配
 - ⏳ 实时预警（WebSocket）
 - ⏳ 数据可视化（ECharts）
 - ⏳ 报表导出（Excel）

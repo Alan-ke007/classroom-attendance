@@ -1,11 +1,11 @@
-// 3D 校园建筑数据
+// 3D 校园建筑数据 — Brutalist Terminal palette
 export const buildings = [
   {
     id: 1,
     name: '教学楼A',
     position: [-7, 0, -5],
     size: [3.5, 3.0, 3.0],
-    color: '#007AFF',
+    color: '#00E5FF',
     attendanceRate: 0.95
   },
   {
@@ -13,7 +13,7 @@ export const buildings = [
     name: '教学楼B',
     position: [0, 0, -5],
     size: [3.5, 3.5, 3.0],
-    color: '#34C759',
+    color: '#E040FB',
     attendanceRate: 0.88
   },
   {
@@ -21,7 +21,7 @@ export const buildings = [
     name: '教学楼C',
     position: [7, 0, -5],
     size: [3.5, 2.5, 3.0],
-    color: '#FF9500',
+    color: '#FFD600',
     attendanceRate: 0.72
   },
   {
@@ -29,7 +29,7 @@ export const buildings = [
     name: '图书馆',
     position: [-5, 0, 4],
     size: [4.5, 4.5, 3.5],
-    color: '#5856D6',
+    color: '#00E676',
     attendanceRate: 0.91
   },
   {
@@ -37,7 +37,7 @@ export const buildings = [
     name: '实验楼',
     position: [5, 0, 4],
     size: [3.5, 3.2, 3.5],
-    color: '#FF3B30',
+    color: '#FF1744',
     attendanceRate: 0.65
   },
   {
@@ -45,7 +45,7 @@ export const buildings = [
     name: '行政楼',
     position: [0, 0, 0],
     size: [2.5, 2.0, 2.5],
-    color: '#AF52DE',
+    color: '#B0BEC5',
     attendanceRate: 0.85
   }
 ]
@@ -62,8 +62,8 @@ export const particlePaths = [
 
 // 出勤率 → 颜色映射
 export function getRateColor(rate) {
-  if (rate >= 0.9) return '#34C759'
-  if (rate >= 0.8) return '#007AFF'
-  if (rate >= 0.7) return '#FF9500'
-  return '#FF3B30'
+  if (rate >= 0.9) return '#00E676'
+  if (rate >= 0.8) return '#00E5FF'
+  if (rate >= 0.7) return '#FFD600'
+  return '#FF1744'
 }

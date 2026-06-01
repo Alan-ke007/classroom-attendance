@@ -50,9 +50,11 @@ CREATE TABLE IF NOT EXISTS `student` (
     `gender` VARCHAR(10) DEFAULT NULL COMMENT '性别',
     `class_id` BIGINT DEFAULT NULL COMMENT '班级ID',
     `user_id` BIGINT DEFAULT NULL COMMENT '关联用户ID',
-    `face_image` VARCHAR(255) DEFAULT NULL COMMENT '人脸图片路径',
     `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
     `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+    `credit_score` INT DEFAULT 100 COMMENT '学风分（0-200，初始100）',
+    `credit_earned` INT DEFAULT 0 COMMENT '累计加分',
+    `credit_deducted` INT DEFAULT 0 COMMENT '累计扣分',
     `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识（0-未删除，1-已删除）',
@@ -217,6 +219,22 @@ CREATE TABLE IF NOT EXISTS `notification` (
     KEY `idx_user_id` (`user_id`),
     KEY `idx_user_read` (`user_id`, `is_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通知消息表';
+
+-- 公告表
+CREATE TABLE IF NOT EXISTS `announcement` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `title` VARCHAR(200) NOT NULL COMMENT '公告标题',
+    `content` TEXT DEFAULT NULL COMMENT '公告内容',
+    `publisher_id` BIGINT DEFAULT NULL COMMENT '发布人ID',
+    `is_pinned` TINYINT DEFAULT 0 COMMENT '是否置顶（0-否，1-是）',
+    `target_role` VARCHAR(20) DEFAULT NULL COMMENT '目标角色（空=全部，student/teacher）',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除标识（0-未删除，1-已删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_publisher_id` (`publisher_id`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公告表';
 
 -- 插入默认管理员账号（密码：admin123，实际使用时需要加密）
 INSERT INTO `user` (`username`, `password`, `real_name`, `role`, `email`) VALUES

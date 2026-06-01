@@ -2,9 +2,9 @@
 
 ## 项目概述
 
-**智课考勤系统**（Classroom Attendance System）是一套面向校园场景的智能化考勤与课堂行为分析平台。系统融合了传统考勤管理、人脸识别签到、YOLOv8 行为检测、实时消息通知和师生即时通讯等能力，提供从学生签到、课堂监控到数据分析的一站式解决方案。
+**智课考勤系统**（Classroom Attendance System）是一套面向校园场景的智能化考勤与课堂行为分析平台。系统融合了传统考勤管理、QR码签到、YOLOv8 行为检测、实时消息通知和师生即时通讯等能力，提供从学生签到、课堂监控到数据分析的一站式解决方案。
 
-项目采用前后端分离架构，后端基于 Spring Boot 3 + MyBatis-Plus，前端使用 Vue 3 + Element Plus，算法层基于 Python Flask + YOLOv8，同时配套微信小程序端。
+项目采用前后端分离架构，后端基于 Spring Boot 3 + MyBatis-Plus，前端使用 Vue 3 + Element Plus，算法层基于 Python Flask + YOLOv8。
 
 ---
 
@@ -31,11 +31,7 @@
 - **框架**: Flask
 - **模型**: YOLOv8（ultralytics）
   - 行为检测模型：mAP@50 达 85.9%
-  - 人脸检测模型
 - **图像处理**: OpenCV
-
-### 微信小程序
-- 基于 uni-app 构建，支持移动端考勤操作
 
 ---
 
@@ -47,7 +43,6 @@
 - 个人资料编辑与密码修改
 
 ### 2. 考勤管理
-- **人脸签到**：学生通过摄像头拍照或上传图片，调用算法服务进行人脸识别后完成签到
 - **二维码签到**：教师生成签到二维码，学生扫码完成签到
 - **考勤记录**：按课程、日期、状态（正常 / 迟到 / 缺勤）多维度查询和统计
 - **考勤统计**：以图表展示出勤率、迟到率、缺勤率等关键指标
@@ -117,7 +112,6 @@ classroom-attendance/
 │       ├── api/                            # API 接口封装
 │       └── components/                     # 公共组件
 ├── algorithm-service/                      # Python 算法服务（Flask + YOLOv8）
-├── miniapp/                                # 微信小程序（uni-app）
 ├── docker/                                 # Docker 编排
 └── docs/                                   # 项目文档
 ```
@@ -130,7 +124,7 @@ classroom-attendance/
 
 | 表名 | 说明 |
 |------|------|
-| user | 用户表（含角色、人脸特征向量） |
+| user | 用户表（含角色权限） |
 | student | 学生信息表 |
 | class_info | 班级表 |
 | course | 课程表（含起止周次） |
@@ -177,8 +171,8 @@ cd algorithm-service && python app.py
 
 ## 技术亮点
 
-- **AI 驱动的考勤**：基于 YOLOv8 的人脸检测与行为识别，无需专用硬件
+- **AI 驱动的考勤**：基于 YOLOv8 的行为检测，无需专用硬件
 - **实时推送**：WebSocket 实现消息、聊天、预警的毫秒级推送
-- **全端覆盖**：Web 管理后台 + 学生端 + 微信小程序
+- **全端覆盖**：Web 管理后台 + 学生移动端
 - **统一 API**：标准 RESTful 接口，统一返回格式，统一异常处理
 - **容器化部署**：Docker Compose 一键启动所有服务

@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <ParticleBackground mode="network" :color="isDark ? '#0A84FF' : '#007AFF'" />
+    <ParticleBackground mode="network" :color="isDark ? '#00E5FF' : '#00B8D4'" />
 
     <!-- 顶栏主题切换 -->
     <div class="login-topbar">
@@ -19,8 +19,8 @@
               <circle cx="24" cy="22" r="2" fill="#fff" opacity="0.6"/>
               <defs>
                 <linearGradient id="gradient" x1="0" y1="0" x2="48" y2="48">
-                  <stop offset="0%" stop-color="#007AFF"/>
-                  <stop offset="100%" stop-color="#0055CC"/>
+                  <stop offset="0%" stop-color="#00E5FF"/>
+                  <stop offset="100%" stop-color="#E040FB"/>
                 </linearGradient>
               </defs>
             </svg>
@@ -102,8 +102,8 @@ const formRef = ref(null)
 const loading = ref(false)
 
 const loginForm = reactive({
-  username: 'admin',
-  password: 'admin123'
+  username: '',
+  password: ''
 })
 
 const rules = {
@@ -190,7 +190,7 @@ const handleLogin = async () => {
 .brand-logo svg {
   width: 56px;
   height: 56px;
-  filter: drop-shadow(0 0 16px rgba(0, 122, 255, 0.35));
+  filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.35));
 }
 
 .brand-title {

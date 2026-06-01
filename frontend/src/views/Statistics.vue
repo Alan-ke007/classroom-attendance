@@ -399,7 +399,7 @@ const initClassChart3D = async () => {
           show: false,
           min: 0,
           max: 100,
-          inRange: { color: ['#FF3B30', '#FF9500', '#007AFF', '#34C759'] }
+          inRange: { color: ['#FF1744', '#FFD600', '#00E5FF', '#E040FB'] }
         },
         grid3D: {
           boxWidth: 70,
@@ -620,7 +620,7 @@ const initScatter3D = async () => {
       zAxis3D: { type: 'value', name: '迟到次数' },
       visualMap: {
         show: false, min: 0, max: 100,
-        inRange: { color: ['#34C759', '#007AFF', '#FF9500', '#FF3B30'] }
+        inRange: { color: ['#E040FB', '#00E5FF', '#FFD600', '#FF1744'] }
       },
       series: [{
         type: 'scatter3D',

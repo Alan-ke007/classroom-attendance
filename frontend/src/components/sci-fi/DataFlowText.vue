@@ -7,7 +7,7 @@
 <script setup>
 defineProps({
   text: { type: String, default: '' },
-  color: { type: String, default: '#007AFF' },
+  color: { type: String, default: '#00E5FF' },
   glitch: { type: Boolean, default: false }
 })
 </script>

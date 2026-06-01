@@ -108,12 +108,12 @@ function formatSize(bytes) {
 }
 
 function categoryTagType(category) {
-  const map = { general: '', face: 'success', course: 'warning', attendance: 'primary' }
+  const map = { general: '', course: 'warning', attendance: 'primary' }
   return map[category] || 'info'
 }
 
 function categoryLabel(category) {
-  const map = { general: '通用', face: '人脸图片', course: '课程资料', attendance: '考勤图片' }
+  const map = { general: '通用', course: '课程资料', attendance: '考勤图片' }
   return map[category] || category
 }
 

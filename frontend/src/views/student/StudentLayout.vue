@@ -6,7 +6,7 @@
     <div :class="{ 'sidebar-open': sidebarOpen }" class="student-sidebar">
       <div class="logo">
         <div class="logo-icon">
-          <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><circle cx="16" cy="14" r="6" stroke="#fff" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#007AFF"/><stop offset="100%" stop-color="#0055CC"/></linearGradient></defs></svg>
+          <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><circle cx="16" cy="14" r="6" stroke="#fff" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="2" fill="#fff"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00E5FF"/><stop offset="100%" stop-color="#E040FB"/></linearGradient></defs></svg>
         </div>
         <div class="logo-text">
           <h3>智课考勤</h3>
@@ -100,6 +100,10 @@
       <el-main>
         <router-view />
       </el-main>
+
+      <el-footer class="app-footer">
+        &#169; {{ currentYear }} 智课考勤 · Smart Classroom Attendance
+      </el-footer>
     </el-container>
   </div>
 </template>
@@ -135,6 +139,7 @@ const unreadCount = ref(0)
 const showProfile = ref(false)
 const sidebarOpen = ref(false)
 const avatarUrl = ref('')
+const currentYear = new Date().getFullYear()
 let unreadTimer = null
 
 const activeMenu = computed(() => route.path)
@@ -289,6 +294,17 @@ const handleLogout = () => {
 .el-main {
   padding: 20px;
   background: transparent;
+}
+
+/* ========== 页脚 ========== */
+.app-footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--c-text-tertiary);
+  padding: 16px 20px;
+  background: var(--c-glass-bg);
+  border-top: 1px solid var(--c-glass-border);
+  letter-spacing: 0.5px;
 }
 
 .chat-badge { margin-left: auto; }

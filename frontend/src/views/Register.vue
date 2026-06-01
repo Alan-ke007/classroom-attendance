@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <ParticleBackground mode="network" :color="isDark ? '#0A84FF' : '#007AFF'" />
+    <ParticleBackground mode="network" :color="isDark ? '#00E5FF' : '#00B8D4'" />
     <div class="bg-shapes">
       <div class="shape shape-1"></div>
       <div class="shape shape-2"></div>

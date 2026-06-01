@@ -34,7 +34,8 @@ const routes = [
       { path: 'qrscan', name: 'StudentQRScan', component: () => import('@/views/student/StudentQRScan.vue') },
       { path: 'notification', name: 'StudentNotification', component: () => import('@/views/NotificationCenter.vue') },
       { path: 'chat', name: 'StudentChat', component: () => import('@/views/chat/ChatPanel.vue') },
-      { path: 'weekly-report', name: 'StudentWeeklyReport', component: () => import('@/views/student/StudentWeeklyReport.vue') }
+      { path: 'weekly-report', name: 'StudentWeeklyReport', component: () => import('@/views/student/StudentWeeklyReport.vue') },
+      { path: 'credit', name: 'StudentCredit', component: () => import('@/views/student/StudentCredit.vue') }
     ]
   },
   // Admin/Teacher routes
@@ -128,6 +129,11 @@ const routes = [
         path: 'log',
         name: 'LogManagement',
         component: () => import('@/views/LogManagement.vue')
+      },
+      {
+        path: 'announcement',
+        name: 'AnnouncementList',
+        component: () => import('@/views/AnnouncementList.vue')
       }
     ]
   },

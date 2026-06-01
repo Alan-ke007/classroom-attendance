@@ -1,6 +1,6 @@
 <template>
   <div class="forgot-container">
-    <ParticleBackground mode="network" :color="isDark ? '#0A84FF' : '#007AFF'" />
+    <ParticleBackground mode="network" :color="isDark ? '#00E5FF' : '#00B8D4'" />
     <div class="bg-shapes">
       <div class="shape shape-1"></div>
       <div class="shape shape-2"></div>
@@ -18,8 +18,8 @@
             <circle cx="24" cy="22" r="2" fill="#fff" opacity="0.6"/>
             <defs>
               <linearGradient id="gradient" x1="0" y1="0" x2="48" y2="48">
-                <stop offset="0%" stop-color="#007AFF"/>
-                <stop offset="100%" stop-color="#0055CC"/>
+                <stop offset="0%" stop-color="#00E5FF"/>
+                <stop offset="100%" stop-color="#E040FB"/>
               </linearGradient>
             </defs>
           </svg>
@@ -327,7 +327,7 @@ const handleReset = async () => {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 2px;
-  background: linear-gradient(135deg, #007AFF, #0055CC);
+  background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
   border: none;
   transition: all 0.3s;
 }
