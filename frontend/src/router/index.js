@@ -156,7 +156,9 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
+// 路由守卫（仅作 UX 层拦截）
+// ⚠️ 注意：前端路由守卫只负责跳转体验，绝不承担鉴权可信度。
+// 真实 RBAC 必须由后端接口层强制校验；localStorage 中的 role/token 均可被前端篡改，不可信。
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')

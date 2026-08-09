@@ -253,10 +253,27 @@ watch(isDark, () => {
   nextTick(() => initCharts())
 })
 
-const handleExportPdf = () => {
+const handleExportPdf = async () => {
   const token = localStorage.getItem('token')
-  const url = `/api/export/pdf/attendance?token=${token}`
-  window.open(url, '_blank')
+  try {
+    // 安全修复(H8): token 走 Authorization 头下发，避免泄露到 URL/Referer/访问日志
+    const res = await fetch('/api/export/pdf/attendance', {
+      headers: { Authorization: 'Bearer ' + token }
+    })
+    if (!res.ok) throw new Error('导出失败: ' + res.status)
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `考勤报表_${new Date().toISOString().slice(0, 10)}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error('PDF导出失败', e)
+    ElMessage.error('PDF导出失败')
+  }
 }
 
 const loadClassQuality = async () => {

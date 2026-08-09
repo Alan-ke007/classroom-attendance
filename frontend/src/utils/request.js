@@ -14,6 +14,7 @@ let isRedirectingToLogin = false
 // 请求拦截器
 request.interceptors.request.use(
   config => {
+    // 安全权衡(P1): token 暂存 localStorage（存在 XSS 读取风险），后续应迁移至 httpOnly Cookie
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`

@@ -302,15 +302,34 @@ const getStatusText = (status) => {
 }
 
 // 导出PDF
-const handleExportPdf = () => {
-  const token = localStorage.getItem('token')
-  const params = new URLSearchParams()
-  if (searchForm.value.dateRange) {
-    params.append('startDate', searchForm.value.dateRange[0])
-    params.append('endDate', searchForm.value.dateRange[1])
+const handleExportPdf = async () => {
+  try {
+    const params = new URLSearchParams()
+    if (searchForm.value.dateRange) {
+      params.append('startDate', searchForm.value.dateRange[0])
+      params.append('endDate', searchForm.value.dateRange[1])
+    }
+    const token = localStorage.getItem('token')
+    // 安全修复(H8): token 走 Authorization 头下发，不再拼入 URL 查询参数
+    const res = await fetch(`/api/export/pdf/attendance?${params.toString()}`, {
+      headers: { Authorization: 'Bearer ' + token }
+    })
+    if (!res.ok) throw new Error('导出失败: ' + res.status)
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    const date = new Date()
+    link.download = `考勤报表_${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败', error)
+    ElMessage.error('导出失败：' + (error.message || '未知错误'))
   }
-  const url = `/api/export/pdf/attendance?${params.toString()}&token=${token}`
-  window.open(url, '_blank')
 }
 
 // 导出Excel
