@@ -55,6 +55,11 @@ npm-debug.log*
 .env.local
 *.local
 
+# Frontend env — 真实 .env.* 禁止提交（历史上曾误提交内部地址/配置）
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
 # Uploads
 uploads/*
 !uploads/.gitkeep
