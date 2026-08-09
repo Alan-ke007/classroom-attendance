@@ -51,3 +51,11 @@ export function getCaptcha() {
     method: 'get'
   })
 }
+
+// 退出登录（② 安全：后端清除 httpOnly Cookie，前端 JS 无法清除）
+export function logout() {
+  return request({
+    url: '/auth/logout',
+    method: 'post'
+  })
+}

@@ -28,6 +28,12 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      // ② 安全：WebSocket 同源代理，确保握手时 httpOnly Cookie 随请求转发到后端完成鉴权
+      '/ws': {
+        target: 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true
       }
     }
   }

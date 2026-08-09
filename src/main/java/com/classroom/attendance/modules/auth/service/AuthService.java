@@ -254,7 +254,7 @@ public class AuthService {
         }
     }
 
-    private String generateRawToken() {
+    String generateRawToken() {
         byte[] bytes = new byte[32];
         new SecureRandom().nextBytes(bytes);
         StringBuilder sb = new StringBuilder();

@@ -74,6 +74,14 @@ public class AlgorithmClient {
         return model;
     }
 
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
     @PostConstruct
     public void warnIfKeyMissing() {
         if (!mock && (apiKey == null || apiKey.isBlank())) {

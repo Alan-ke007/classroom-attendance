@@ -77,9 +77,9 @@ const visible = computed({
   set: v => emit('update:modelValue', v)
 })
 
-const uploadHeaders = computed(() => ({
-  Authorization: 'Bearer ' + (localStorage.getItem('token') || '')
-}))
+// ② 安全：鉴权改走 httpOnly Cookie，浏览器在同源上传时自动携带，无需手动注入 Authorization 头。
+// （手动注入会带上 "Bearer null" 反而被后端过滤器拒绝。）
+const uploadHeaders = computed(() => ({}))
 
 const saving = ref(false)
 const changingPwd = ref(false)

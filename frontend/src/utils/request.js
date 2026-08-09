@@ -5,7 +5,9 @@ import router from '@/router'
 // 创建 axios 实例
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 15000
+  timeout: 15000,
+  // ② 安全：携带 httpOnly Cookie（JWT 存于 Cookie，JS 不可读，由浏览器自动随同源请求发送）
+  withCredentials: true
 })
 
 // 防止重复提示的标志
@@ -14,11 +16,8 @@ let isRedirectingToLogin = false
 // 请求拦截器
 request.interceptors.request.use(
   config => {
-    // 安全权衡(P1): token 暂存 localStorage（存在 XSS 读取风险），后续应迁移至 httpOnly Cookie
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+    // ② 安全：鉴权改走 httpOnly Cookie，浏览器自动随同源请求携带，前端不再手动注入 Bearer。
+    // （保留后端对 Authorization 头的兼容读取，便于非浏览器/API 调用方使用。）
     return config
   },
   error => {
@@ -97,7 +96,9 @@ request.interceptors.response.use(
 )
 
 /**
- * 处理Token过期
+ * 处理Token过期（后端 401）
+ * ② 安全：token 已不在前端可见（httpOnly Cookie），此处只需清除本地 userInfo 软状态并跳转登录。
+ * httpOnly Cookie 由后端 /auth/logout 或自然过期失效，前端 JS 无法清除。
  */
 function handleTokenExpired() {
   if (isRedirectingToLogin) {
@@ -106,8 +107,7 @@ function handleTokenExpired() {
   
   isRedirectingToLogin = true
   
-  // 清除本地存储的token和用户信息
-  localStorage.removeItem('token')
+  // 清除本地的 userInfo 软状态（不含 token，token 仅存 httpOnly Cookie）
   localStorage.removeItem('userInfo')
   
   // 显示提示消息

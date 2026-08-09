@@ -37,9 +37,11 @@ public class CorsConfig {
                     .forEach(patterns::add);
         }
         patterns.forEach(config::addAllowedOriginPattern);
-        // 鉴权使用 Bearer 头而非 Cookie，无需携带凭证。
-        config.setAllowCredentials(false);
-        config.addAllowedHeader("*");
+        // ② 安全：鉴权改走 httpOnly Cookie，需携带凭证；配合显式来源（无通配符 "*"）使用。
+        config.setAllowCredentials(true);
+        // 显式允许的请求头（含 Cookie，供凭证跨域携带）；不使用 "*" 以契合凭证模式。
+        config.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type", "Cookie", "X-Requested-With"));
         // 收敛请求方法，避免暴露不必要动词
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 

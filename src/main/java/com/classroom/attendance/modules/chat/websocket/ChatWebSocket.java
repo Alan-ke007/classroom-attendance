@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-@ServerEndpoint("/ws/chat")
+@ServerEndpoint(value = "/ws/chat", configurator = JwtCookieHandshakeConfigurator.class)
 public class ChatWebSocket {
 
     private static final Map<Long, Session> userSessions = new ConcurrentHashMap<>();
@@ -42,14 +42,19 @@ public class ChatWebSocket {
     @OnOpen
     public void onOpen(Session session) {
         try {
-            Map<String, List<String>> params = session.getRequestParameterMap();
-            List<String> tokenParams = params.get("token");
-            if (tokenParams == null || tokenParams.isEmpty()) {
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Missing token"));
-                return;
+            // ② 安全：优先取握手配置器从 httpOnly Cookie 提取的 JWT；兜底兼容旧式 ?token= 查询参数。
+            String token = (String) session.getUserProperties().get("token");
+            if (token == null) {
+                Map<String, List<String>> params = session.getRequestParameterMap();
+                List<String> tokenParams = params.get("token");
+                if (tokenParams == null || tokenParams.isEmpty()) {
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Missing token"));
+                    return;
+                }
+                token = tokenParams.get(0);
             }
             Claims claims = Jwts.parser().verifyWith(secretKey).build()
-                    .parseSignedClaims(tokenParams.get(0)).getPayload();
+                    .parseSignedClaims(token).getPayload();
             this.currentUserId = claims.get("userId", Long.class);
             if (this.currentUserId == null) {
                 session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Invalid token"));

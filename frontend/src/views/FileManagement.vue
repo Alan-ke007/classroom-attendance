@@ -170,13 +170,10 @@ async function handleUpload(options) {
 }
 
 async function handleDownload(row) {
-  const token = localStorage.getItem('token')
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
   try {
-    // 安全修复(H8): token 走 Authorization 头下发，避免泄露到 URL/Referer/访问日志
-    const res = await fetch(`${baseUrl}/file/download/${row.id}`, {
-      headers: { Authorization: 'Bearer ' + token }
-    })
+    // ② 安全：同源 fetch 由浏览器自动携带 httpOnly Cookie 完成鉴权，无需手动注入 Authorization 头。
+    const res = await fetch(`${baseUrl}/file/download/${row.id}`, {})
     if (!res.ok) throw new Error('下载失败: ' + res.status)
     const blob = await res.blob()
     const url = window.URL.createObjectURL(blob)

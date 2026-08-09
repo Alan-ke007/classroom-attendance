@@ -362,11 +362,8 @@ const handleExportPdf = async () => {
       params.append('startDate', searchForm.value.dateRange[0])
       params.append('endDate', searchForm.value.dateRange[1])
     }
-    const token = localStorage.getItem('token')
-    // 安全修复(H8): token 走 Authorization 头下发，不再拼入 URL 查询参数
-    const res = await fetch(`/api/export/pdf/attendance?${params.toString()}`, {
-      headers: { Authorization: 'Bearer ' + token }
-    })
+    // ② 安全：同源 fetch 由浏览器自动携带 httpOnly Cookie 完成鉴权，无需手动注入 Authorization 头。
+    const res = await fetch(`/api/export/pdf/attendance?${params.toString()}`, {})
     if (!res.ok) throw new Error('导出失败: ' + res.status)
     const blob = await res.blob()
     const url = window.URL.createObjectURL(blob)

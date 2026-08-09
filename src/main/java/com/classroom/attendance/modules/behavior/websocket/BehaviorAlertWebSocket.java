@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-@ServerEndpoint("/ws/behavior-alert")
+@ServerEndpoint(value = "/ws/behavior-alert", configurator = JwtCookieHandshakeConfigurator.class)
 public class BehaviorAlertWebSocket {
 
     private static final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
@@ -43,13 +43,18 @@ public class BehaviorAlertWebSocket {
     public void onOpen(Session session) {
         this.sessionId = session.getId();
         try {
-            Map<String, List<String>> params = session.getRequestParameterMap();
-            List<String> tokenParams = params.get("token");
-            if (tokenParams == null || tokenParams.isEmpty()) {
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Missing token"));
-                return;
+            // ② 安全：优先取握手配置器从 httpOnly Cookie 提取的 JWT；兜底兼容旧式 ?token= 查询参数。
+            String token = (String) session.getUserProperties().get("token");
+            if (token == null) {
+                Map<String, List<String>> params = session.getRequestParameterMap();
+                List<String> tokenParams = params.get("token");
+                if (tokenParams == null || tokenParams.isEmpty()) {
+                    session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Missing token"));
+                    return;
+                }
+                token = tokenParams.get(0);
             }
-            Claims claims = jwtUtil.getClaimsFromToken(tokenParams.get(0));
+            Claims claims = jwtUtil.getClaimsFromToken(token);
             this.userId = claims.get("userId", Long.class);
             this.role = claims.get("role", String.class);
             this.realName = claims.get("realName", String.class);

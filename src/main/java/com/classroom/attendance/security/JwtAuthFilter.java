@@ -5,6 +5,7 @@ import com.classroom.attendance.infrastructure.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class JwtAuthFilter implements Filter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             Constants.ApiPath.LOGIN, Constants.ApiPath.REGISTER, Constants.ApiPath.CAPTCHA,
-            Constants.ApiPath.FORGOT_PWD, Constants.ApiPath.RESET_PWD);
+            Constants.ApiPath.FORGOT_PWD, Constants.ApiPath.RESET_PWD, Constants.ApiPath.LOGOUT);
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -74,6 +75,15 @@ public class JwtAuthFilter implements Filter {
         String authHeader = req.getHeader(Constants.TOKEN_HEADER);
         if (authHeader != null && authHeader.startsWith(Constants.TOKEN_PREFIX)) {
             return authHeader.substring(7);
+        }
+        // ② 安全：httpOnly Cookie 兜底（JS 不可读，防 XSS 窃取；浏览器自动随同源请求携带）
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("token".equals(c.getName())) {
+                    return c.getValue();
+                }
+            }
         }
         return req.getParameter("token");
     }

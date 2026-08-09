@@ -178,6 +178,7 @@ import {
   ChatDotRound,
 } from '@element-plus/icons-vue'
 import { getUnreadCount } from '@/api/chat'
+import { logout } from '@/api/auth'
 import { useTheme } from '@/composables/useTheme'
 import ParticleBackground from '@/components/sci-fi/ParticleBackground.vue'
 import ProfileDialog from '@/components/ProfileDialog.vue'
@@ -263,8 +264,13 @@ function onProfileUpdated(info) {
   avatarUrl.value = info.avatar || ''
 }
 
-const handleLogout = () => {
-  localStorage.removeItem('token')
+const handleLogout = async () => {
+  // ② 安全：httpOnly Cookie 无法由前端 JS 清除，必须调用后端 /auth/logout 下发 Max-Age=0 使其失效。
+  try {
+    await logout()
+  } catch (e) {
+    // 即使后端清除失败，也继续清理本地软状态并跳转（Cookie 自然过期或不合法时同样安全）
+  }
   localStorage.removeItem('userInfo')
   ElMessage.success('已退出登录')
   router.push('/login')

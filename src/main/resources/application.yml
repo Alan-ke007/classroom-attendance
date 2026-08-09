@@ -67,6 +67,7 @@ cors:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000  # 24小时（毫秒）
+  cookie-secure: ${JWT_COOKIE_SECURE:false}  # ② httpOnly Cookie 的 Secure 标记：仅生产 HTTPS 设 true，本地 HTTP 联调保持 false
 
 # 算法服务（人脸核验中转，变体 A：算法仅 extract，后端持 gallery 并做 1:1 判定）
 # 密钥仅后端环境变量（NF1），缺省启动告警但不致命失败；mock 档用于本地联调（F10）。

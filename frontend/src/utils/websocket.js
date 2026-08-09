@@ -21,11 +21,12 @@ class BehaviorAlertWebSocket {
       console.log('WebSocket已连接')
       return
     }
+    // ② 安全：未登录不连接（软判断）；登录态以 httpOnly Cookie 为准，浏览器握手时自动携带。
+    if (!localStorage.getItem('userInfo')) return
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.hostname + ':8080'
-    const token = localStorage.getItem('token') || ''
-    const wsUrl = `${protocol}//${host}/ws/behavior-alert?token=${encodeURIComponent(token)}`
+    const host = window.location.host
+    const wsUrl = `${protocol}//${host}/ws/behavior-alert`
 
     try {
       this.ws = new WebSocket(wsUrl)

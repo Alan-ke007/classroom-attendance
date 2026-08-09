@@ -127,7 +127,7 @@ const handleLogin = async () => {
       loading.value = true
       try {
         const res = await login(loginForm)
-        localStorage.setItem('token', res.data.token)
+        // ② 安全：后端已将 JWT 写入 httpOnly Cookie（JS 不可读），前端只持久化非敏感 userInfo 软状态。
         localStorage.setItem('userInfo', JSON.stringify(res.data))
         ElMessage.success('登录成功')
         const target = res.data.role === 'student' ? '/student/home' : '/dashboard'

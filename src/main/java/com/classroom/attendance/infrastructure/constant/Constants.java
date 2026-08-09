@@ -12,6 +12,7 @@ public final class Constants {
         public static final String REGISTER     = "/api/auth/register";
         public static final String FORGOT_PWD   = "/api/auth/forgot-password";
         public static final String RESET_PWD    = "/api/auth/reset-password";
+        public static final String LOGOUT       = "/api/auth/logout";
         public static final String CAPTCHA      = "/api/captcha/generate";
         public static final String WS_BEHAVIOR  = "/ws/behavior";
         public static final String WS_CHAT      = "/ws/chat";

@@ -3,7 +3,6 @@
 FROM node:18-alpine AS build
 
 ARG VITE_API_BASE_URL
-ARG VITE_ALGORITHM_BASE_URL
 
 WORKDIR /app
 

@@ -12,12 +12,12 @@ class ChatSocket {
   }
 
   connect() {
-    const token = localStorage.getItem('token')
-    if (!token) return
+    // ② 安全：未登录不连接（软判断）；登录态以 httpOnly Cookie 为准，浏览器握手时自动携带。
+    if (!localStorage.getItem('userInfo')) return
     this._intentionalClose = false
     const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = import.meta.env.VITE_WS_HOST || 'localhost:8080'
-    const url = `${protocol}//${host}/ws/chat?token=${encodeURIComponent(token)}`
+    // 同源连接：确保与页面同源，浏览器才会在 WS 握手时自动带上 httpOnly Cookie（经由 Vite/网关代理转发）。
+    const url = `${protocol}//${location.host}/ws/chat`
 
     try {
       this.ws = new WebSocket(url)

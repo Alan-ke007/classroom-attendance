@@ -158,13 +158,13 @@ const router = createRouter({
 
 // 路由守卫（仅作 UX 层拦截）
 // ⚠️ 注意：前端路由守卫只负责跳转体验，绝不承担鉴权可信度。
-// 真实 RBAC 必须由后端接口层强制校验；localStorage 中的 role/token 均可被前端篡改，不可信。
+// ② 安全：登录态以 httpOnly Cookie 为准（JS 不可读），此处用 localStorage 中的 userInfo 软状态做 UX 判断；
+// 真实鉴权/ RBAC 由后端接口层强制校验（Cookie + 401）。若 Cookie 失效，首个接口 401 即触发重新登录。
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
   const role = userInfo.role
 
-  if (to.meta.requiresAuth && !token) {
+  if (to.meta.requiresAuth && !role) {
     next('/login')
     return
   }
@@ -177,7 +177,7 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  if ((to.path === '/login' || to.path === '/register') && token) {
+  if ((to.path === '/login' || to.path === '/register') && role) {
     next(role === 'student' ? '/student/home' : '/dashboard')
     return
   }
