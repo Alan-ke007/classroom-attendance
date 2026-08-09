@@ -44,6 +44,10 @@ public class Attendance implements Serializable {
     private String imagePath;
     private String remark;
 
+    // 人脸核验（P1）：face_status 复用 confidence(BigDecimal) 作 face_confidence；face_source 标记来源
+    private String faceStatus;   // VERIFIED / NEED_REVIEW / REJECTED（F7/F8/F9）
+    private String faceSource;   // 来源标记，如 miniapp_checkin
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

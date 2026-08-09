@@ -67,3 +67,14 @@ cors:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000  # 24小时（毫秒）
+
+# 算法服务（人脸核验中转，变体 A：算法仅 extract，后端持 gallery 并做 1:1 判定）
+# 密钥仅后端环境变量（NF1），缺省启动告警但不致命失败；mock 档用于本地联调（F10）。
+algorithm:
+  base-url: ${ALGORITHM_BASE_URL:http://localhost:5000}   # 仅后端→算法，localhost 受信(NF2)
+  api-key: ${ALGORITHM_API_KEY:}                          # 仅后端环境变量(NF1)，缺省启动告警
+  mock: ${ALGORITHM_MOCK:false}                            # F10 本地联调档
+  connect-timeout-ms: ${ALGORITHM_CONNECT_TIMEOUT_MS:5000}
+  read-timeout-ms: ${ALGORITHM_READ_TIMEOUT_MS:8000}       # 呼应 NF3，<3s 目标
+  threshold: ${ALGORITHM_FACE_THRESHOLD:0.4}               # 余弦相似度阈值，可调(§8)
+  model: ${ALGORITHM_FACE_MODEL:buffalo_l}
