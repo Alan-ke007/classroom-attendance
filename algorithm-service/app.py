@@ -85,6 +85,7 @@ def _require_auth():
 
 # 全局变量存储模型
 behavior_model = None
+face_analyzer = None   # InsightFace buffalo_l（人脸特征提取，512 维 embedding）[P1/F1]
 
 # 行为类别映射
 BEHAVIOR_CLASSES = {
@@ -120,8 +121,34 @@ def load_model_with_fallback(name, primary_path, fallback_name):
     return model
 
 
+def load_face_models():
+    """加载 InsightFace buffalo_l（CPU / ONNXRuntime），产出 512 维 L2 归一化 embedding [P1/F1]"""
+    global face_analyzer
+    try:
+        from insightface.app import FaceAnalysis
+        face_analyzer = FaceAnalysis(
+            name='buffalo_l',
+            providers=['CPUExecutionProvider'],
+        )
+        # ctx_id=-1 表示 CPU；det_size / det_thresh 严格按 PRD §8.2
+        ctx_id = 0 if DEVICE == 'cuda' else -1
+        face_analyzer.prepare(ctx_id=ctx_id, det_size=(640, 640), det_thresh=0.5)
+        print("✓ 人脸模型(buffalo_l)加载成功")
+
+        # 预热：用 dummy 图填充模型，避免首请求冷启（对应 PRD §8.3）
+        try:
+            face_analyzer.get(np.zeros((640, 640, 3), dtype=np.uint8))
+        except Exception as _warm_e:
+            print(f"⚠ 人脸模型预热无结果(可忽略): {_warm_e}")
+        print("✓ 人脸模型预热完成")
+    except Exception as e:
+        # 模型未就绪(如首次下载受网络限制)不应阻断进程启动，仅置 None 由 /health 反映 503
+        print(f"✗ 人脸模型(buffalo_l)加载失败: {e}")
+        face_analyzer = None
+
+
 def load_models():
-    """加载YOLO模型（含备用降级方案）"""
+    """加载YOLO行为模型 + InsightFace人脸模型（含备用降级方案）"""
     global behavior_model
     print("\n加载模型中...")
 
@@ -132,10 +159,12 @@ def load_models():
     else:
         print(f"✗ 所有模型加载失败")
 
+    load_face_models()
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """健康检查接口 [C2-#7] 如实反映模型就绪状态，未就绪返回 503"""
-    ready = behavior_model is not None
+    ready = (behavior_model is not None) and (face_analyzer is not None)
     return jsonify({
         'status': 'ok' if ready else 'degraded',
         'model_loaded': ready,
@@ -321,6 +350,86 @@ def upload_model():
         # [C2-#6] 5xx 仅返回通用信息，禁止泄露内部路径
         app.logger.error(f"upload_model failed: {e}")
         return jsonify({'code': 500, 'message': '上传失败，请稍后重试'}), 500
+
+@app.route('/api/face/extract', methods=['POST'])
+def extract_face():
+    """
+    人脸特征提取接口 [P1/F1]
+    输入图片(base64) -> 512 维 L2 归一化 embedding（InsightFace buffalo_l）。
+    算法服务无状态、不持有 gallery；多脸直接报错，不返回计数。
+    输入校验与错误码风格复用 /api/behavior/detect 模板。
+    """
+    try:
+        # 模型未加载（如首次下载受网络限制）-> 500，不泄露内部堆栈
+        if face_analyzer is None:
+            return jsonify({'code': 500, 'message': '人脸模型未加载'}), 500
+
+        # [C2-#6] 输入校验：必须是 JSON 且 body 非空
+        if not request.is_json:
+            return jsonify({'code': 400, 'message': '请求必须为 JSON'}), 400
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or not data:
+            return jsonify({'code': 400, 'message': '请求体为空或格式错误'}), 400
+
+        # 获取 base64 编码的图片
+        image_base64 = data.get('image', '')
+        if not image_base64:
+            return jsonify({'code': 400, 'message': '未提供图片数据'}), 400
+
+        # [C2-#6] 兼容 data:image/...;base64, 前缀
+        raw = image_base64
+        if isinstance(raw, str) and raw.startswith('data:'):
+            try:
+                raw = raw.split(',', 1)[1]
+            except Exception:
+                raw = ''
+
+        # [C2-#6] base64 解码单独 try，失败返 400（不向上层泄露内部错误）
+        try:
+            image_data = base64.b64decode(raw, validate=True)
+        except Exception:
+            return jsonify({'code': 400, 'message': '图片 base64 解码失败'}), 400
+
+        nparr = np.frombuffer(image_data, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if image is None:
+            return jsonify({'code': 400, 'message': '图片解码失败'}), 400
+
+        # [C2-#6] 限制输入尺寸，防止超大图耗尽内存/算力；宽或高 >4000px 返回 400
+        h, w = image.shape[:2]
+        if w <= 0 or h <= 0 or max(w, h) > 4000:
+            return jsonify({'code': 400, 'message': '图片尺寸超出允许范围(最大 4000px)'}), 400
+
+        # InsightFace 检测 + 识别（不限制 max_num，以便准确统计人脸数）
+        faces = face_analyzer.get(image)
+        face_count = len(faces)
+
+        if face_count == 0:
+            return jsonify({'code': 40010, 'message': 'NO_FACE_DETECTED'}), 400
+        if face_count > 1:
+            return jsonify({'code': 40011, 'message': 'MULTI_FACE_DETECTED'}), 400
+
+        # 取唯一人脸的 512 维 embedding，强制 L2 归一化（idempotent）
+        emb = faces[0].embedding.astype(np.float32)
+        norm = np.linalg.norm(emb)
+        if norm > 0:
+            emb = emb / norm
+
+        result = {
+            'code': 200,
+            'message': '提取成功',
+            'data': {
+                'embedding': emb.tolist(),
+                'faceCount': 1,
+            }
+        }
+        return jsonify(result)
+
+    except Exception as e:
+        # [C2-#6] 5xx 仅返回通用信息并记录日志，禁止泄露内部路径/堆栈
+        app.logger.error(f"extract_face failed: {e}")
+        return jsonify({'code': 500, 'message': '检测失败，请稍后重试'}), 500
+
 
 # [C2-#1] 模块导入即加载模型：gunicorn 多 worker 各自独立加载（python app.py 同样生效）
 load_models()
