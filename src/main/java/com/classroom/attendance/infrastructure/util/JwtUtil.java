@@ -3,6 +3,7 @@ package com.classroom.attendance.infrastructure.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +16,24 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:defaultSecretKeyForClassroomAttendanceSystem2024}")
+    // 密钥必须从环境变量/密钥管理注入；删除硬编码回退默认值，缺失即启动失败。
+    @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}")
     private Long expiration;
+
+    @PostConstruct
+    public void validateSecret() {
+        // 密钥必须 >= 32 字节（HS256 要求）。缺失或为空直接阻止启动，杜绝回退默认值。
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT secret 未配置：必须通过环境变量 JWT_SECRET 注入，禁止硬编码默认值");
+        }
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException("JWT secret 强度不足：长度须 >= 32 字节（HS256）");
+        }
+    }
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));

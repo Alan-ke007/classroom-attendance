@@ -46,23 +46,22 @@ public class AuthController extends BaseController {
         BusinessException.isTrue(username != null && !username.isEmpty() && email != null && !email.isEmpty(),
                 "请输入用户名和邮箱");
 
-        User user = authService.findByUsername(username);
-        BusinessException.isTrue(user != null && email.equals(user.getEmail()), "用户名与邮箱不匹配");
-        return Result.success("身份验证通过");
+        // C4：校验用户名/邮箱匹配后签发绑定 username 的签名重置令牌（TTL 15m）。
+        // TODO 安全：生产环境应通过邮件/OTP 下发令牌，而非直接返回；并加限流防爆破。
+        String resetToken = authService.createPasswordResetToken(username, email);
+        return Result.success("验证通过，请使用重置令牌重置密码", resetToken);
     }
 
     @PostMapping("/reset-password")
     public Result<String> resetPassword(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String email = body.get("email");
+        String token = body.get("token");
         String newPassword = body.get("newPassword");
-        BusinessException.isTrue(username != null && email != null && newPassword != null
-                && !username.isEmpty() && !email.isEmpty() && newPassword.length() >= Constants.User.PASSWORD_MIN_LEN,
-                "请填写完整信息，密码至少6位");
+        BusinessException.isTrue(token != null && !token.isEmpty() && newPassword != null
+                && newPassword.length() >= Constants.User.PASSWORD_MIN_LEN,
+                "请填写重置令牌和新密码，密码至少6位");
 
-        User user = authService.findByUsername(username);
-        BusinessException.isTrue(user != null && email.equals(user.getEmail()), "验证信息不匹配");
-        authService.resetPassword(user.getId(), newPassword);
+        // C4：必须提供有效重置令牌，且仅能重置令牌绑定用户（服务端身份，忽略请求体 username/email）。
+        authService.resetPasswordWithToken(token, newPassword);
         return Result.success("密码重置成功");
     }
 

@@ -2,7 +2,9 @@ package com.classroom.attendance.modules.file.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classroom.attendance.infrastructure.constant.Constants;
 import com.classroom.attendance.infrastructure.exception.BusinessException;
+import com.classroom.attendance.infrastructure.util.SecurityUtil;
 import com.classroom.attendance.modules.file.entity.FileRecord;
 import com.classroom.attendance.modules.file.mapper.FileRecordMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -26,6 +29,13 @@ public class FileRecordService {
 
     @Value("${file.upload.path:./uploads}")
     private String uploadPath;
+
+    // H5：仅允许图片/文档类扩展名；拒绝 .html/.svg/.js 等可执行/可渲染类型（存储型 XSS 防护）。
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv", ".zip");
+    private static final Set<String> BLOCKED_EXTENSIONS = Set.of(
+            ".html", ".htm", ".svg", ".js", ".jsp", ".php", ".exe", ".sh", ".bat", ".jar", ".class");
 
     private final FileRecordMapper fileRecordMapper;
 
@@ -42,6 +52,16 @@ public class FileRecordService {
         String extension = "";
         int dotIndex = originalName.lastIndexOf('.');
         if (dotIndex > 0) extension = originalName.substring(dotIndex).toLowerCase();
+
+        // H5：拒绝可执行/可渲染类型，并限制为白名单扩展名，防止存储型 XSS / 恶意文件上传。
+        String contentType = file.getContentType();
+        if (BLOCKED_EXTENSIONS.contains(extension)
+                || (contentType != null && (contentType.contains("html") || contentType.contains("svg")))) {
+            throw new BusinessException(400, "不允许上传该类型文件");
+        }
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new BusinessException(400, "不支持的文件类型: " + extension);
+        }
 
         String storedName = UUID.randomUUID().toString() + extension;
         String dateDir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
@@ -75,6 +95,7 @@ public class FileRecordService {
     public void downloadFile(Long fileId, HttpServletResponse response) {
         FileRecord record = fileRecordMapper.selectById(fileId);
         BusinessException.notNull(record, "文件不存在");
+        assertOwnerOrPrivileged(record); // H3：仅上传者本人或 admin/teacher 可下载
 
         Path filePath = Paths.get(uploadPath, record.getFilePath());
         File file = filePath.toFile();
@@ -100,15 +121,33 @@ public class FileRecordService {
 
     public FileRecord getFileById(Long id) {
         BusinessException.notNull(id, "文件不存在");
-        return fileRecordMapper.selectById(id);
+        FileRecord record = fileRecordMapper.selectById(id);
+        assertOwnerOrPrivileged(record); // H3：仅上传者本人或 admin/teacher 可查看
+        return record;
     }
 
     public Page<FileRecord> getFileList(Integer pageNum, Integer pageSize, String category) {
         Page<FileRecord> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<FileRecord> w = new LambdaQueryWrapper<>();
+        // H3：普通学生仅能列出自己上传的文件；admin/teacher 可查看全部。
+        String role = SecurityUtil.getCurrentRole();
+        if (!Constants.Role.ADMIN.equals(role) && !Constants.Role.TEACHER.equals(role)) {
+            Long current = SecurityUtil.getCurrentUserId();
+            w.eq(FileRecord::getUploadBy, current != null ? current : -1L);
+        }
         w.orderByDesc(FileRecord::getCreateTime);
         if (category != null && !category.isEmpty()) w.eq(FileRecord::getCategory, category);
         return fileRecordMapper.selectPage(page, w);
+    }
+
+    // H3：上传者本人或 admin/teacher 才允许访问该文件记录。
+    private void assertOwnerOrPrivileged(FileRecord record) {
+        String role = SecurityUtil.getCurrentRole();
+        if (Constants.Role.ADMIN.equals(role) || Constants.Role.TEACHER.equals(role)) return;
+        Long current = SecurityUtil.getCurrentUserId();
+        if (current == null || !current.equals(record.getUploadBy())) {
+            throw new BusinessException(403, "无权访问该文件");
+        }
     }
 
     public void deleteFile(Long id) {

@@ -54,7 +54,16 @@ file:
   upload:
     path: E:/classroom-attendance/uploads  # 文件存储根目录（使用绝对路径）
 
+# CORS 跨域来源白名单（逗号分隔）。生产必须显式配置为前端域名，例如 https://your-frontend.com。
+# 开发环境本机 localhost/127.0.0.1 任意端口已在 CorsConfig 内置放行（兼容 Vite 5173 等），
+# 故此处默认留空；切勿配置为 "*"。
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+
 # JWT 配置
+# 密钥必须由环境变量/密钥管理（如 Vault/K8s Secret）注入，禁止硬编码。
+# 未配置 JWT_SECRET 时应用启动失败（占位符无默认值）。
+# 注意：本仓库历史中可能已提交过明文密钥，需用 git filter-repo 清理（本工具不执行该操作）。
 jwt:
-  secret: ***REMOVED***
+  secret: ${JWT_SECRET}
   expiration: 86400000  # 24小时（毫秒）

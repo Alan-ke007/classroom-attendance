@@ -10,9 +10,8 @@ import com.classroom.attendance.modules.attendance.enums.AttendanceStatus;
 import com.classroom.attendance.modules.attendance.mapper.AttendanceMapper;
 import com.classroom.attendance.modules.course.entity.Course;
 import com.classroom.attendance.modules.course.mapper.CourseMapper;
-import com.classroom.attendance.modules.student.entity.Student;
-import com.classroom.attendance.modules.student.mapper.StudentMapper;
 import com.classroom.attendance.modules.student.service.CreditScoreService;
+import com.classroom.attendance.infrastructure.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +34,6 @@ public class QRCodeController extends BaseController {
     private final JwtUtil jwtUtil;
     private final CourseMapper courseMapper;
     private final AttendanceMapper attendanceMapper;
-    private final StudentMapper studentMapper;
     private final CreditScoreService creditScoreService;
 
     private static final String[] WEEKDAY_NAMES = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
@@ -77,13 +75,13 @@ public class QRCodeController extends BaseController {
     @PostMapping("/checkin")
     public Result<Map<String, Object>> checkin(@RequestBody Map<String, String> body) {
         String token = body.get("token");
-        String studentIdStr = body.get("studentId");
-        String studentNo = body.get("studentNo");
-
-        Long studentId = resolveStudentId(studentIdStr, studentNo);
+        // 安全(H2)：签到主体以服务端当前登录学生身份为准，忽略请求体 studentId/studentNo，防伪造签到。
+        Long studentId = SecurityUtil.getCurrentStudentId();
+        BusinessException.notNull(studentId, "未获取到学生身份，请先登录");
 
         Map<String, Object> claims = jwtUtil.parseToken(token);
         BusinessException.isTrue("qrcode_checkin".equals(claims.get("type")), "无效的签到二维码");
+        // TODO 安全(H2)：当前 QR token 仅绑定 courseId，应进一步绑定 studentId/classId、单次使用、短时效（P1）。
 
         Long courseId = ((Number) claims.get("courseId")).longValue();
         LocalDate today = LocalDate.now();
@@ -159,18 +157,5 @@ public class QRCodeController extends BaseController {
         }).toList();
 
         return Result.success(result);
-    }
-
-    private Long resolveStudentId(String studentIdStr, String studentNo) {
-        if (studentIdStr != null && !studentIdStr.isEmpty()) {
-            return Long.valueOf(studentIdStr);
-        }
-        if (studentNo != null && !studentNo.isEmpty()) {
-            Student student = studentMapper.selectOne(
-                    new LambdaQueryWrapper<Student>().eq(Student::getStudentNo, studentNo));
-            BusinessException.notNull(student, "学号不存在: " + studentNo);
-            return student.getId();
-        }
-        throw new BusinessException("请提供学生ID或学号");
     }
 }

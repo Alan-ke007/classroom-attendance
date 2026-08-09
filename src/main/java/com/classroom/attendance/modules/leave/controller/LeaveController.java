@@ -20,6 +20,7 @@ public class LeaveController extends BaseController {
 
     private final LeaveRequestService leaveRequestService;
 
+    // 归属裁剪在 service 内按角色执行：学生仅看自己，教师/管理员看全部（H1 修复，避免学生端 403）
     @GetMapping("/list")
     public Result<Page<LeaveRequest>> getLeaveList(
             @RequestParam(defaultValue = "1") int pageNum,

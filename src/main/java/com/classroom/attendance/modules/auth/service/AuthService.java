@@ -11,6 +11,8 @@ import com.classroom.attendance.modules.auth.mapper.UserMapper;
 import com.classroom.attendance.modules.captcha.service.CaptchaService;
 import com.classroom.attendance.modules.student.entity.Student;
 import com.classroom.attendance.modules.student.mapper.StudentMapper;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -74,7 +76,8 @@ public class AuthService {
         user.setUsername(req.getUsername());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRealName(req.getRealName());
-        user.setRole(req.getRole() != null ? req.getRole() : Constants.Role.STUDENT);
+        // 安全(C3)：公开注册忽略客户端传入的 role，强制为 STUDENT，防止自提权。
+        user.setRole(Constants.Role.STUDENT);
         user.setEmail(req.getEmail());
         user.setPhone(req.getPhone());
         userMapper.insert(user);
@@ -153,6 +156,42 @@ public class AuthService {
 
     public void resetPassword(Long id, String newPassword) {
         User user = userMapper.selectById(id);
+        BusinessException.notNull(user, "用户不存在");
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userMapper.updateById(user);
+    }
+
+    /**
+     * C4：生成无状态、签名的密码重置令牌，绑定 username，TTL 15 分钟。
+     * 安全说明：真正安全应通过邮件/OTP 下发令牌并加限流；当前无邮件基础设施，
+     * 仅完成结构性修复，令牌投递与限流为后续项（P1）。
+     */
+    public String createPasswordResetToken(String username, String email) {
+        User user = findByUsername(username);
+        BusinessException.isTrue(user != null && email != null && email.equals(user.getEmail()), "用户名与邮箱不匹配");
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("purpose", "reset");
+        claims.put("username", username);
+        return jwtUtil.generateToken(claims, 15 * 60 * 1000L); // 15 分钟
+    }
+
+    /**
+     * C4：校验重置令牌（有效签名 + 未过期 + purpose=reset），仅重置令牌绑定用户。
+     * 备注：单次数使用需服务端 nonce/黑名单，留作 P1；15 分钟 TTL 已限制重放窗口。
+     */
+    public void resetPasswordWithToken(String token, String newPassword) {
+        BusinessException.isTrue(newPassword != null && newPassword.length() >= Constants.User.PASSWORD_MIN_LEN,
+                "请填写新密码，至少" + Constants.User.PASSWORD_MIN_LEN + "位");
+        Map<String, Object> claims;
+        try {
+            claims = jwtUtil.parseToken(token); // 签名/过期校验在此抛出
+        } catch (Exception e) {
+            throw new BusinessException("重置令牌无效或已过期");
+        }
+        BusinessException.isTrue("reset".equals(claims.get("purpose")), "重置令牌无效");
+        String username = (String) claims.get("username");
+        BusinessException.notNull(username, "重置令牌无效");
+        User user = findByUsername(username);
         BusinessException.notNull(user, "用户不存在");
         user.setPassword(passwordEncoder.encode(newPassword));
         userMapper.updateById(user);

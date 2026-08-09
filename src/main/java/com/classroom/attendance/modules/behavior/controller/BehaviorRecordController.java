@@ -43,31 +43,37 @@ public class BehaviorRecordController extends BaseController {
         return Result.success(behaviorRecordService.listForCurrentUser(pageNum, pageSize, studentName, behaviorType, handled));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：单条行为记录为跨租户 PII
     @GetMapping("/{id}")
     public Result<BehaviorRecord> getBehaviorById(@PathVariable Long id) {
         return Result.success(behaviorRecordService.getById(id));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按学生查全量行为（跨学生数据）
     @GetMapping("/student/{studentId}")
     public Result<List<BehaviorRecord>> getBehaviorsByStudentId(@PathVariable Long studentId) {
         return Result.success(behaviorRecordService.getByStudentId(studentId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按班级查全量行为
     @GetMapping("/class/{classId}")
     public Result<List<BehaviorRecord>> getBehaviorsByClassId(@PathVariable Long classId) {
         return Result.success(behaviorRecordService.getByClassId(classId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按类型查全量行为
     @GetMapping("/type/{behaviorType}")
     public Result<List<BehaviorRecord>> getBehaviorsByType(@PathVariable String behaviorType) {
         return Result.success(behaviorRecordService.getByType(behaviorType));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：未处理行为列表（跨学生）
     @GetMapping("/unhandled")
     public Result<List<BehaviorRecord>> getUnhandledBehaviors() {
         return Result.success(behaviorRecordService.getUnhandled());
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按时间范围查全量行为
     @GetMapping("/range")
     public Result<List<BehaviorRecord>> getBehaviorsByTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,

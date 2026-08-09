@@ -3,6 +3,9 @@ package com.classroom.attendance.modules.student.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.classroom.attendance.infrastructure.annotation.RequireRole;
 import com.classroom.attendance.infrastructure.base.BaseController;
+import com.classroom.attendance.infrastructure.constant.Constants;
+import com.classroom.attendance.infrastructure.exception.BusinessException;
+import com.classroom.attendance.infrastructure.util.SecurityUtil;
 import com.classroom.attendance.infrastructure.response.Result;
 import com.classroom.attendance.modules.student.entity.Student;
 import com.classroom.attendance.modules.student.service.CreditScoreService;
@@ -30,16 +33,19 @@ public class StudentController extends BaseController {
         return Result.success(studentService.listForCurrentUser(pageNum, pageSize));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：全量学生名单（PII）
     @GetMapping("/all")
     public Result<List<Student>> getAllStudents() {
         return Result.success(studentService.getAllStudents());
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按班级查全量学生（PII）
     @GetMapping("/byClass")
     public Result<List<Student>> getByClassId(@RequestParam Long classId) {
         return Result.success(studentService.getByClassId(classId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按 ID 查学生 PII
     @GetMapping("/{id}")
     public Result<Student> getStudentById(@PathVariable Long id) {
         return Result.success(studentService.getById(id));
@@ -66,8 +72,13 @@ public class StudentController extends BaseController {
         return Result.success("删除学生成功");
     }
 
+    // 归属裁剪：学生仅能查自己的学分；教师/管理员可查任意（H1 修复，避免学生端 403）
     @GetMapping("/credit-score/{id}")
     public Result<Map<String, Object>> getCreditScore(@PathVariable Long id) {
+        if (Constants.Role.STUDENT.equals(SecurityUtil.getCurrentRole())
+                && !id.equals(SecurityUtil.getCurrentStudentId())) {
+            throw new BusinessException(403, "无权查看他人学分信息");
+        }
         Student s = studentService.getById(id);
         int score = creditScoreService.getCreditScore(id);
         return Result.success(Map.of(

@@ -17,7 +17,7 @@ public class RegisterRequest {
     @NotBlank(message = "真实姓名不能为空")
     private String realName;
 
-    private String role;
+    private String role; // 公开注册忽略客户端 role（见 AuthService.register），保留字段仅为兼容
     private String email;
     private String phone;
 

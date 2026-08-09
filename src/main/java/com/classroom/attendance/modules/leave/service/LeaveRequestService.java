@@ -2,7 +2,9 @@ package com.classroom.attendance.modules.leave.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.classroom.attendance.infrastructure.constant.Constants;
 import com.classroom.attendance.infrastructure.exception.BusinessException;
+import com.classroom.attendance.infrastructure.util.SecurityUtil;
 import com.classroom.attendance.modules.attendance.entity.Attendance;
 import com.classroom.attendance.modules.attendance.enums.AttendanceStatus;
 import com.classroom.attendance.modules.attendance.mapper.AttendanceMapper;
@@ -37,7 +39,14 @@ public class LeaveRequestService {
     public Page<LeaveRequest> getLeaveList(int pageNum, int pageSize, Long studentId, String status) {
         Page<LeaveRequest> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<LeaveRequest> w = new LambdaQueryWrapper<>();
-        if (studentId != null) w.eq(LeaveRequest::getStudentId, studentId);
+        // 归属裁剪：学生强制只看自己；教师/管理员可指定 studentId 或查全部
+        Long resolvedStudentId = studentId;
+        if (Constants.Role.STUDENT.equals(SecurityUtil.getCurrentRole())) {
+            Long current = SecurityUtil.getCurrentStudentId();
+            BusinessException.notNull(current, "未获取到学生身份，请重新登录");
+            resolvedStudentId = current;
+        }
+        if (resolvedStudentId != null) w.eq(LeaveRequest::getStudentId, resolvedStudentId);
         if (status != null && !status.isEmpty()) w.eq(LeaveRequest::getStatus, status);
         w.orderByDesc(LeaveRequest::getCreateTime);
         return leaveRequestMapper.selectPage(page, w);

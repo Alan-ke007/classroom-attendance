@@ -1,5 +1,6 @@
 package com.classroom.attendance.modules.attendance.controller;
 
+import com.classroom.attendance.infrastructure.annotation.RequireRole;
 import com.classroom.attendance.infrastructure.base.BaseController;
 import com.classroom.attendance.modules.attendance.entity.Attendance;
 import com.classroom.attendance.modules.attendance.enums.AttendanceStatus;
@@ -35,6 +36,7 @@ public class ExportController extends BaseController {
 
     private final AttendanceMapper attendanceMapper;
 
+    @RequireRole({"admin", "teacher"}) // H1：全量考勤报表导出属 admin/teacher 专属
     @GetMapping("/pdf/attendance")
     public void exportAttendancePdf(
             @RequestParam(required = false) String startDate,

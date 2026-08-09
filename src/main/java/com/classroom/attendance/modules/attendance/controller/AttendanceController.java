@@ -46,26 +46,31 @@ public class AttendanceController extends BaseController {
         return Result.success(attendanceService.listForCurrentUser(pageNum, pageSize, studentName, status, startDate, endDate));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：单条考勤记录为跨租户 PII
     @GetMapping("/{id}")
     public Result<Attendance> getAttendanceById(@PathVariable Long id) {
         return Result.success(attendanceService.getById(id));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按学生查全量考勤（跨学生数据）
     @GetMapping("/student/{studentId}")
     public Result<List<Attendance>> getAttendancesByStudentId(@PathVariable Long studentId) {
         return Result.success(attendanceService.getByStudentId(studentId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按班级查全量考勤
     @GetMapping("/class/{classId}")
     public Result<List<Attendance>> getAttendancesByClassId(@PathVariable Long classId) {
         return Result.success(attendanceService.getByClassId(classId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按课程查全量考勤
     @GetMapping("/course/{courseId}")
     public Result<List<Attendance>> getAttendancesByCourseId(@PathVariable Long courseId) {
         return Result.success(attendanceService.getByCourseId(courseId));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：按日期范围查全量考勤
     @GetMapping("/range")
     public Result<List<Attendance>> getAttendancesByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -73,6 +78,7 @@ public class AttendanceController extends BaseController {
         return Result.success(attendanceService.getByDateRange(startDate, endDate));
     }
 
+    @RequireRole({"admin", "teacher"}) // H1：出勤率按任意 studentId 计算，属跨租户
     @GetMapping("/rate/{studentId}")
     public Result<Double> calculateAttendanceRate(
             @PathVariable Long studentId,
