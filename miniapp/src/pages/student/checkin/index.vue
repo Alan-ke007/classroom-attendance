@@ -36,9 +36,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { addAttendance } from '@/api/attendance'
-import { recognizeFace } from '@/api/algorithm'
-import { BASE_URL } from '@/config'
+import { faceCheckin } from '@/api/face'
 
 const courseId = ref('')
 const courseName = ref('')
@@ -87,30 +85,15 @@ function retake() {
   setTimeout(() => { cameraCtx = uni.createCameraContext() }, 500)
 }
 
-// C6 人脸签到客户端防呆（受限实现）
-// 完整闭环依赖后端识别接口 + 算法服务鉴权（P1 协同），
-// 当前仅做客户端前置校验：写库前必须完成身份比对，识别失败则不落库 present。
+// P1：图片随 faceCheckin 一并上传后端，写签到由后端合并端点完成（VERIFIED/NEED_REVIEW 均放行）
+// 小程序只透传图片、按后端 faceStatus 分支展示，绝不自行断言 VERIFIED（R6）
 async function submitCheckin() {
   submitting.value = true
   resultMsg.value = ''
   try {
     const facePass = await verifyFace()
-    if (!facePass) {
-      resultMsg.value = '人脸核验未通过，签到已取消'
-      resultType.value = 'error'
-      return
-    }
-
-    const userInfo = uni.getStorageSync('userInfo') || {}
-    await addAttendance({
-      studentId: userInfo.studentId,
-      courseId: courseId.value,
-      status: 'present',
-      imagePath: capturedImage.value,
-      remark: '小程序签到'
-    })
-    resultMsg.value = '签到成功！'
-    resultType.value = 'success'
+    if (!facePass) return   // REJECTED：verifyFace 已提示并取消签到，不写库
+    // 写签到已在 faceCheckin 合并端点内由后端完成，此处仅提示并退出
     setTimeout(() => { uni.navigateBack() }, 1500)
   } catch (e) {
     resultMsg.value = '签到失败: ' + (e.message || '未知错误')
@@ -120,17 +103,14 @@ async function submitCheckin() {
   }
 }
 
-// C6 人脸身份比对（客户端防呆）
-// 流程：读取图片 -> 上传后端/对象存储 -> 调用算法服务识别
-// 注：生产环境上传与识别应由后端中转鉴权，前端不直连算法服务（P1）
+// P1：调后端合并端点（faceCheckin）完成「提取+比对+写签到」，按 faceStatus 明确分支
+// 后端算法不可达时返回 NEED_REVIEW（降级放行），比对不通过返回 REJECTED（取消签到），
+// 二者以枚举强制区分，杜绝旧版「算法不可达就无痕 return true」（R7）。小程序不直连算法、不伪造 VERIFIED。
 async function verifyFace() {
   if (!capturedImage.value) {
     uni.showToast({ title: '请先拍照', icon: 'none' })
     return false
   }
-  const userInfo = uni.getStorageSync('userInfo') || {}
-
-  // 1) 图片转 base64 供算法服务识别
   let base64
   try {
     base64 = await readImageBase64(capturedImage.value)
@@ -139,32 +119,32 @@ async function verifyFace() {
     return false
   }
 
-  // 2) 上传图片到后端/对象存储（需后端提供上传/识别接口）
-  //    后端暂无上传接口时可跳过，但生产必须上传以供服务端复核
+  let r
   try {
-    await uploadCheckinImage(capturedImage.value)
+    // 图片随签到一并上传后端；request.js 自动带 JWT，不直连算法、不持有密钥
+    r = await faceCheckin({ courseId: courseId.value, image: base64 })
   } catch (e) {
-    console.warn('图片上传失败，将仅做前端识别', e)
-  }
-
-  // 3) 调用算法服务完成人脸比对（前端直连，P1 整改：应由后端中转鉴权）
-  let res
-  try {
-    res = await recognizeFace(base64)
-  } catch (e) {
-    // 算法服务暂不可达（如未配置密钥 / P1 后端中转未就绪）：降级为常规签到，避免阻塞主流程。
-    // 待 P1 后端代理就位、识别接口可用后，此分支将返回真实比对结果并真正生效。
-    console.warn('人脸识别服务不可用，降级为常规签到', e)
-    uni.showToast({ title: '人脸服务暂不可用，已按常规签到', icon: 'none' })
-    return true
-  }
-
-  // 识别结果判定：以 matched/success 为准；若返回 studentId 须与当前用户一致
-  const matched = res && (res.matched === true || res.success === true || res.code === 200)
-  if (!matched) return false
-  if (res.studentId && userInfo.studentId && String(res.studentId) !== String(userInfo.studentId)) {
+    // 网络/服务端错误（非可降级的 faceStatus 分支）：按真实错误提示，不静默放行
+    resultMsg.value = e.message || '核验请求失败，请重试'
+    resultType.value = 'error'
     return false
   }
+
+  const status = r && r.faceStatus
+  if (status === 'REJECTED') {
+    resultMsg.value = '人脸核验未通过，签到已取消'
+    resultType.value = 'error'
+    return false
+  }
+  if (status === 'NEED_REVIEW') {
+    // 后端已写签到（降级放行），仅提示待复核
+    resultMsg.value = r.message || '已签到，人脸待复核'
+    resultType.value = 'success'
+    return true
+  }
+  // VERIFIED（默认放行）
+  resultMsg.value = r.message || '签到成功！'
+  resultType.value = 'success'
   return true
 }
 
@@ -174,23 +154,6 @@ function readImageBase64(path) {
       filePath: path,
       encoding: 'base64',
       success: (r) => resolve(r.data),
-      fail: reject
-    })
-  })
-}
-
-// 上传签到图片（需后端提供上传/识别接口；URL 走 config.BASE_URL）
-function uploadCheckinImage(path) {
-  return new Promise((resolve, reject) => {
-    uni.uploadFile({
-      url: BASE_URL + '/attendance/upload', // TODO: 与后端确认上传接口路径
-      filePath: path,
-      name: 'file',
-      formData: { type: 'checkin' },
-      success: (r) => {
-        if (r.statusCode >= 200 && r.statusCode < 300) resolve(r)
-        else reject(new Error('upload failed: ' + r.statusCode))
-      },
       fail: reject
     })
   })

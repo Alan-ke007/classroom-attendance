@@ -82,6 +82,7 @@ const stats = ref({ totalCourses: 0, presentCount: 0, absentCount: 0, rate: 100 
 const weekNames = ['周日','周一','周二','周三','周四','周五','周六']
 const quickItems = [
   { path: '/pages/student/checkin/index', icon: '📷', label: '人脸签到' },
+  { path: '/pages/student/face-enroll/index', icon: '🧑', label: '人脸建档' },
   { path: '/pages/student/schedule/index', icon: '📅', label: '课程表' },
   { path: '/pages/student/attendance/index', icon: '📋', label: '考勤记录' },
   { path: '/pages/student/qrscan/index', icon: '📱', label: '扫码签到' },

@@ -5,6 +5,7 @@
     {"path": "pages/student/home/index", "style": {"navigationBarTitleText": "学生首页"}},
     {"path": "pages/student/schedule/index", "style": {"navigationBarTitleText": "课程表"}},
     {"path": "pages/student/checkin/index", "style": {"navigationBarTitleText": "人脸签到"}},
+    {"path": "pages/student/face-enroll/index", "style": {"navigationBarTitleText": "人脸建档"}},
     {"path": "pages/student/attendance/index", "style": {"navigationBarTitleText": "考勤记录", "enablePullDownRefresh": true}},
     {"path": "pages/student/behavior/index", "style": {"navigationBarTitleText": "行为记录", "enablePullDownRefresh": true}},
     {"path": "pages/teacher/home/index", "style": {"navigationBarTitleText": "教师首页"}},
