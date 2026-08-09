@@ -274,16 +274,18 @@ const handleLogout = () => {
 <style scoped>
 .dashboard {
   min-height: 100vh;
-  background: transparent;
+  background: var(--bg);
 }
 
-/* ========== Sidebar — Brutalist ========== */
+/* ========== Sidebar — Glass (Track A) ========== */
 .el-aside {
-  background: var(--c-sidebar);
-  border-right: var(--bw) solid var(--c-border);
-  color: var(--c-text);
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-right: 1px solid var(--border);
+  color: var(--text);
   overflow-x: hidden;
-  box-shadow: 4px 0 0 0 rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-1);
   transition: transform 0.15s ease;
 }
 
@@ -292,16 +294,16 @@ const handleLogout = () => {
   align-items: center;
   gap: 10px;
   padding: 16px 18px;
-  background: var(--c-bg-alt);
-  border-bottom: var(--bw) solid var(--c-border);
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--border);
 }
 .logo-icon svg { display: block; width: 32px; height: 32px; }
 .logo-text h3 {
-  margin: 0; color: var(--c-text); font-size: 15px; font-weight: 700; line-height: 1.2;
+  margin: 0; color: var(--text); font-size: 15px; font-weight: 700; line-height: 1.2;
   letter-spacing: -0.02em;
 }
 .logo-text span {
-  font-size: 10px; color: var(--c-text-tertiary); font-weight: 500;
+  font-size: 10px; color: var(--text-2); font-weight: 500;
   text-transform: uppercase; letter-spacing: 0.08em;
 }
 
@@ -312,24 +314,24 @@ const handleLogout = () => {
 
 :deep(.el-menu-item),
 :deep(.el-sub-menu__title) {
-  transition: all 0.1s ease;
-  margin: 1px 4px;
+  transition: all 0.18s var(--ease);
+  margin: 2px 6px;
   border-radius: var(--radius-md);
-  color: var(--c-text-secondary) !important;
+  color: var(--text-2) !important;
   border-left: 3px solid transparent;
 }
 
 :deep(.el-menu-item:hover),
 :deep(.el-sub-menu__title:hover) {
-  background: var(--c-accent-bg) !important;
-  color: var(--c-text) !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
 }
 
 :deep(.el-menu-item.is-active) {
-  background: var(--c-accent-bg) !important;
-  color: var(--c-accent) !important;
+  background: rgba(0,229,255,.12) !important;
+  color: var(--primary) !important;
   font-weight: 700;
-  border-left: 3px solid var(--c-accent);
+  border-left: 3px solid var(--primary);
 }
 
 :deep(.el-sub-menu .el-menu) {
@@ -342,11 +344,13 @@ const handleLogout = () => {
 /* ========== Overlay ========== */
 .sidebar-overlay { display: none; }
 
-/* ========== Header — Brutalist ========== */
+/* ========== Header — Glass (Track A) ========== */
 .el-header {
-  background: var(--c-header);
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
   padding: 0 16px;
-  border-bottom: var(--bw-bold) solid var(--c-border);
+  border-bottom: 1px solid var(--border);
   transition: background-color 0.15s ease;
 }
 
@@ -372,8 +376,8 @@ const handleLogout = () => {
   width: 32px;
   height: 32px;
   padding: 4px;
-  background: var(--c-bg-alt);
-  border: var(--bw) solid var(--c-border);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
   cursor: pointer;
   z-index: 1100;
@@ -382,7 +386,7 @@ const handleLogout = () => {
   display: block;
   width: 100%;
   height: 2px;
-  background: var(--c-text-secondary);
+  background: var(--text-2);
 }
 
 .breadcrumb {
@@ -395,11 +399,11 @@ const handleLogout = () => {
 
 :deep(.el-breadcrumb__inner) {
   font-weight: 500;
-  color: var(--c-text-secondary) !important;
+  color: var(--text-2) !important;
 }
 
 :deep(.el-breadcrumb__inner:hover) {
-  color: var(--c-accent) !important;
+  color: var(--primary) !important;
 }
 
 .user-info {
@@ -413,19 +417,19 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: var(--c-text-secondary);
+  color: var(--text-2);
   font-size: 13px;
   font-weight: 600;
   padding: 6px 12px;
-  border: var(--bw) solid transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  transition: all 0.1s ease;
+  transition: all 0.18s var(--ease);
 }
 
 .user-name:hover {
-  background: var(--c-accent-bg);
-  color: var(--c-accent);
-  border-color: var(--c-accent-border);
+  background: var(--surface);
+  color: var(--primary);
+  border-color: var(--border);
 }
 
 .user-name-text { display: inline; }
@@ -436,17 +440,17 @@ const handleLogout = () => {
   background: transparent;
 }
 
-/* ========== Footer ========== */
+/* ========== Footer — Glass (Track A) ========== */
 .app-footer {
   text-align: center;
   font-size: 11px;
   font-weight: 600;
-  color: var(--c-text-tertiary);
+  color: var(--text-2);
   padding: 14px 20px;
-  background: var(--c-bg-alt);
-  border-top: var(--bw) solid var(--c-border);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 /* ========== Mobile ========== */
