@@ -272,6 +272,14 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
+/* ============================================================
+   智课考勤 · 管理端布局（玻璃轨 Track A）
+   本文件只消费 tokens.css 中 .track-glass 定义的语义变量
+   （--bg / --surface / --border / --text / --primary /
+    --radius-* / --blur / --shadow-* 等），不直接写任何颜色或
+   尺寸字面量，保证暗/亮双主题自动换肤。
+   容器已在 App.vue 根节点挂 .track-glass，故此处样式天然归属玻璃轨。
+   ============================================================ */
 .dashboard {
   min-height: 100vh;
   background: var(--bg);
@@ -280,8 +288,6 @@ const handleLogout = () => {
 /* ========== Sidebar — Glass (Track A) ========== */
 .el-aside {
   background: var(--surface);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   border-right: 1px solid var(--border);
   color: var(--text);
   overflow-x: hidden;
@@ -345,10 +351,10 @@ const handleLogout = () => {
 .sidebar-overlay { display: none; }
 
 /* ========== Header — Glass (Track A) ========== */
+/* 注：顶栏不加 backdrop-filter —— 其背后是 main 区域而非叠加内容，
+   模糊无可视收益且常驻全宽会增加合成开销，靠 --surface 半透明填充表达玻璃感即可。 */
 .el-header {
   background: var(--surface);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
   transition: background-color 0.15s ease;
