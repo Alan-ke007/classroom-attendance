@@ -46,10 +46,9 @@ public class AuthController extends BaseController {
         BusinessException.isTrue(username != null && !username.isEmpty() && email != null && !email.isEmpty(),
                 "请输入用户名和邮箱");
 
-        // C4：校验用户名/邮箱匹配后签发绑定 username 的签名重置令牌（TTL 15m）。
-        // TODO 安全：生产环境应通过邮件/OTP 下发令牌，而非直接返回；并加限流防爆破。
-        String resetToken = authService.createPasswordResetToken(username, email);
-        return Result.success("验证通过，请使用重置令牌重置密码", resetToken);
+        // C4 安全加固：限流 + 防枚举 + 令牌仅存哈希不下发；返回统一提示，不回显令牌。
+        authService.requestPasswordReset(username, email);
+        return Result.success("若账户存在，重置链接已发送");
     }
 
     @PostMapping("/reset-password")

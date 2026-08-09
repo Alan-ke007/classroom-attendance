@@ -11,9 +11,19 @@ import com.classroom.attendance.modules.auth.mapper.UserMapper;
 import com.classroom.attendance.modules.captcha.service.CaptchaService;
 import com.classroom.attendance.modules.student.entity.Student;
 import com.classroom.attendance.modules.student.mapper.StudentMapper;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +39,12 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final CaptchaService captchaService;
+    private final PasswordResetTokenMapper resetTokenMapper;
+
+    // C4 限流：内存固定窗口（演示用，单实例；多实例应换 Redis）。按客户端 IP 计数。
+    private final ConcurrentHashMap<String, Deque<Long>> resetRateLimit = new ConcurrentHashMap<>();
+    private static final int RESET_MAX_PER_WINDOW = 5;
+    private static final long RESET_WINDOW_MS = 60_000L;
 
     public LoginResponse login(LoginRequest req) {
         User user = findByUsername(req.getUsername());
@@ -162,39 +178,100 @@ public class AuthService {
     }
 
     /**
-     * C4：生成无状态、签名的密码重置令牌，绑定 username，TTL 15 分钟。
-     * 安全说明：真正安全应通过邮件/OTP 下发令牌并加限流；当前无邮件基础设施，
-     * 仅完成结构性修复，令牌投递与限流为后续项（P1）。
+     * C4（安全加固，无外部基建）：申请密码重置。
+     * - 按客户端 IP 限流（60s 内最多 5 次），防爆破。
+     * - 防用户枚举：username/email 不匹配也返回同样的"已发送"提示，不暴露账户是否存在。
+     * - 生成随机令牌，服务端仅存 SHA-256 哈希（一次性 + 15 分钟 TTL），原始令牌不下发前端。
+     *   真实投递（邮件/OTP）为后续项；当前仅在 DEBUG 日志打印原始令牌便于本地联调。
      */
-    public String createPasswordResetToken(String username, String email) {
+    public void requestPasswordReset(String username, String email) {
+        assertResetNotRateLimited();
         User user = findByUsername(username);
-        BusinessException.isTrue(user != null && email != null && email.equals(user.getEmail()), "用户名与邮箱不匹配");
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("purpose", "reset");
-        claims.put("username", username);
-        return jwtUtil.generateToken(claims, 15 * 60 * 1000L); // 15 分钟
+        boolean valid = user != null && email != null && email.equals(user.getEmail());
+        if (!valid) {
+            return; // 统一返回，不暴露账户是否存在
+        }
+        String raw = generateRawToken();
+        String hash = sha256Hex(raw);
+        LocalDateTime now = LocalDateTime.now();
+        resetTokenMapper.insert(PasswordResetToken.builder()
+                .username(username).tokenHash(hash)
+                .expiry(now.plusMinutes(15)).used(0).createTime(now).build());
+        if (log.isDebugEnabled()) {
+            log.debug("C4 本地联调重置令牌(仅 DEBUG，生产不应打印): {}", raw);
+        }
     }
 
     /**
-     * C4：校验重置令牌（有效签名 + 未过期 + purpose=reset），仅重置令牌绑定用户。
-     * 备注：单次数使用需服务端 nonce/黑名单，留作 P1；15 分钟 TTL 已限制重放窗口。
+     * C4（安全加固）：凭重置令牌改密。令牌为一次性 + 15 分钟 TTL，校验失败即用即废。
      */
     public void resetPasswordWithToken(String token, String newPassword) {
         BusinessException.isTrue(newPassword != null && newPassword.length() >= Constants.User.PASSWORD_MIN_LEN,
                 "请填写新密码，至少" + Constants.User.PASSWORD_MIN_LEN + "位");
-        Map<String, Object> claims;
-        try {
-            claims = jwtUtil.parseToken(token); // 签名/过期校验在此抛出
-        } catch (Exception e) {
+        String hash = sha256Hex(token);
+        PasswordResetToken record = resetTokenMapper.selectOne(new LambdaQueryWrapper<PasswordResetToken>()
+                .eq(PasswordResetToken::getTokenHash, hash).eq(PasswordResetToken::getUsed, 0));
+        BusinessException.notNull(record, "重置令牌无效或已过期");
+        if (record.getExpiry().isBefore(LocalDateTime.now())) {
+            resetTokenMapper.deleteById(record.getId());
             throw new BusinessException("重置令牌无效或已过期");
         }
-        BusinessException.isTrue("reset".equals(claims.get("purpose")), "重置令牌无效");
-        String username = (String) claims.get("username");
-        BusinessException.notNull(username, "重置令牌无效");
-        User user = findByUsername(username);
+        // 一次性：立即作废
+        record.setUsed(1);
+        resetTokenMapper.updateById(record);
+
+        User user = findByUsername(record.getUsername());
         BusinessException.notNull(user, "用户不存在");
         user.setPassword(passwordEncoder.encode(newPassword));
         userMapper.updateById(user);
+    }
+
+    // ---- C4 辅助 ----
+
+    private void assertResetNotRateLimited() {
+        String ip = clientIp();
+        Deque<Long> hits = resetRateLimit.computeIfAbsent(ip, k -> new ArrayDeque<>());
+        long now = System.currentTimeMillis();
+        synchronized (hits) {
+            while (!hits.isEmpty() && now - hits.peekFirst() > RESET_WINDOW_MS) hits.pollFirst();
+            if (hits.size() >= RESET_MAX_PER_WINDOW) {
+                throw new BusinessException("操作过于频繁，请稍后再试");
+            }
+            hits.addLast(now);
+        }
+    }
+
+    private String clientIp() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs == null) return "unknown";
+            HttpServletRequest req = attrs.getRequest();
+            String fwd = req.getHeader("X-Forwarded-For");
+            if (fwd != null && !fwd.isEmpty()) return fwd.split(",")[0].trim();
+            return req.getRemoteAddr();
+        } catch (Exception e) {
+            return "unknown";
+        }
+    }
+
+    private String generateRawToken() {
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    private String sha256Hex(String raw) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] h = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : h) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new BusinessException("令牌处理失败");
+        }
     }
 
     public void deleteUser(Long id) {
