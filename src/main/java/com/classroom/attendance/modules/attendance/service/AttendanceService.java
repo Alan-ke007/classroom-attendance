@@ -51,6 +51,36 @@ public class AttendanceService {
         return result;
     }
 
+    /**
+     * F9 管理端人脸复核列表：按 faceStatus 筛选（默认 NEED_REVIEW），支持班级/课程/姓名收窄。
+     * 仅 admin/teacher 可调（controller 已加 @RequireRole）。
+     */
+    public Page<Attendance> getFaceReviewList(Integer pageNum, Integer pageSize,
+                                              String faceStatus, Long classId, Long courseId,
+                                              String studentName) {
+        String fs = (faceStatus == null || faceStatus.isEmpty()) ? "NEED_REVIEW" : faceStatus;
+        Page<Attendance> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Attendance> w = new LambdaQueryWrapper<>();
+        w.eq(Attendance::getFaceStatus, fs);
+        if (classId != null) w.eq(Attendance::getClassId, classId);
+        if (courseId != null) w.eq(Attendance::getCourseId, courseId);
+        if (studentName != null && !studentName.isEmpty()) {
+            List<Long> matched = studentMapper.selectList(
+                    new LambdaQueryWrapper<Student>().like(Student::getName, studentName).select(Student::getId))
+                    .stream().map(Student::getId).toList();
+            if (matched.isEmpty()) {
+                Page<Attendance> empty = new Page<>(pageNum, pageSize);
+                empty.setTotal(0);
+                return empty;
+            }
+            w.in(Attendance::getStudentId, matched);
+        }
+        w.orderByDesc(Attendance::getAttendanceDate).orderByDesc(Attendance::getCreateTime);
+        Page<Attendance> result = attendanceMapper.selectPage(page, w);
+        fillRelatedData(result.getRecords());
+        return result;
+    }
+
     public Page<Attendance> listForCurrentUser(Integer pageNum, Integer pageSize,
                                                 String studentName, String status,
                                                 LocalDate startDate, LocalDate endDate) {

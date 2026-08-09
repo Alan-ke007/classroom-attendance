@@ -46,6 +46,18 @@ public class AttendanceController extends BaseController {
         return Result.success(attendanceService.listForCurrentUser(pageNum, pageSize, studentName, status, startDate, endDate));
     }
 
+    @RequireRole({"admin", "teacher"}) // F9：管理端人脸复核列表（按 faceStatus 筛选，默认 NEED_REVIEW）
+    @GetMapping("/face-review")
+    public Result<Page<Attendance>> getFaceReviewList(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false, defaultValue = "NEED_REVIEW") String faceStatus,
+            @RequestParam(required = false) Long classId,
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) String studentName) {
+        return Result.success(attendanceService.getFaceReviewList(pageNum, pageSize, faceStatus, classId, courseId, studentName));
+    }
+
     @RequireRole({"admin", "teacher"}) // H1：单条考勤记录为跨租户 PII
     @GetMapping("/{id}")
     public Result<Attendance> getAttendanceById(@PathVariable Long id) {
