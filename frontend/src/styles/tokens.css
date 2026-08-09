@@ -1,0 +1,83 @@
+/* ============================================================
+   智课考勤 · 双轨 Design Tokens（Direction A 双轨）
+   单一事实来源：玻璃后台(Track A) + 粗野大屏(Track B)
+   ------------------------------------------------------------
+   用法：容器加 .track-glass / .track-brutal，
+        组件读取语义变量 --bg/--surface/--border/--text/
+        --radius/--shadow 自动换肤。
+   与 App.vue 现有 --c-* 共存（向后兼容旧页面），
+   新双轨系统统一使用本文件定义的变量。
+   规范来源：DESIGN_SYSTEM_SPEC_A.md §1
+   ============================================================ */
+
+/* ---------- 共享品牌 Token（两轨共用，品牌霓虹）---------- */
+:root {
+  --brand-cyan:    #00E5FF;   /* 主品牌霓虹 — 实时/AI/主操作 */
+  --brand-magenta: #E040FB;   /* 次品牌霓虹 — 行为/预警 */
+  --brand-yellow:  #FFD600;   /* 点睛霓虹 — 高亮数字/告警 */
+  --brand-ink:     #04121A;   /* 霓虹底上的深色文字，保证 AA 对比 */
+
+  /* 通用字体（App.vue 已定义 --font-mono，此处补 sans / display）*/
+  --font-sans: 'Inter', system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+
+  /* 字阶 12 → 48 */
+  --fs-xs: 12px; --fs-sm: 14px; --fs-base: 16px; --fs-lg: 18px; --fs-xl: 20px;
+  --fs-2xl: 24px; --fs-3xl: 30px; --fs-4xl: 36px; --fs-5xl: 48px;
+
+  /* 间距（4px 基准）*/
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-6: 24px;
+  --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+  /* 动效 */
+  --motion-fast: 150ms; --motion: 250ms; --motion-slow: 400ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 层级 */
+  --z-nav: 100; --z-modal: 1100; --z-toast: 1200;
+}
+
+/* ---------- 轨道 A · 玻璃后台（深色优先）---------- */
+.track-glass {
+  /* 表面与背景 */
+  --bg: #0A0E1A;                                          /* 应用底色（深空蓝黑）*/
+  --surface: rgba(255,255,255,.06);                       /* 玻璃卡片底 */
+  --surface-strong: rgba(255,255,255,.10);
+  --border: rgba(255,255,255,.10);                        /* 玻璃描边 */
+  --border-strong: rgba(255,255,255,.18);
+
+  /* 文字 */
+  --text: #E6EBF5;                                        /* 主文字 ≈14:1 ✓AA */
+  --text-2: #9AA7C2;                                      /* 次文字 ≈6.5:1 ✓AA */
+  --text-3: #6B7894;                                      /* 辅助 ≈4.0:1（仅大字/禁用）*/
+
+  /* 语义色（已校准深色底对比）*/
+  --primary: var(--brand-cyan);
+  --success: #2EE6A6;
+  --warning: #FFB020;
+  --danger: #FF5C7A;
+  --info: #4DA8FF;
+
+  /* 形状 / 阴影 / 模糊 */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(0,0,0,.30);
+  --shadow-2: 0 8px 24px rgba(0,0,0,.40);
+  --blur: 16px;                                           /* backdrop-filter */
+  --glow: 0 0 0 1px rgba(0,229,255,.30), 0 0 24px rgba(0,229,255,.18);  /* 主操作微光 */
+}
+
+/* ---------- 轨道 B · 粗野大屏（近黑 + 硬边硬影 + 霓虹辉光）---------- */
+.track-brutal {
+  --bg: #05070D;                                          /* 大屏底色（近黑）*/
+  --surface: #0E1320;                                     /* 实体面板 */
+  --border: #1B2740;                                      /* 分割线 */
+  --border-cyan: 2px solid var(--brand-cyan);
+  --border-magenta: 2px solid var(--brand-magenta);
+  --border-yellow: 2px solid var(--brand-yellow);
+  --shadow-hard: 6px 6px 0 #000;                          /* 硬偏移黑影（招牌）*/
+  --radius: 0;                                            /* 全部尖角 */
+  --glow-cyan: 0 0 12px rgba(0,229,255,.55);
+  --glow-magenta: 0 0 12px rgba(224,64,251,.55);
+  --glow-yellow: 0 0 12px rgba(255,214,0,.55);
+  --scan: rgba(0,229,255,.05);                            /* 扫描线叠层 */
+}

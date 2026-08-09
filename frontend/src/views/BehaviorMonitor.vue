@@ -1,5 +1,5 @@
 <template>
-  <div class="behavior-monitor">
+  <div class="behavior-monitor track-brutal">
     <el-card>
       <template #header>
         <div class="card-header">

@@ -1,9 +1,11 @@
 <template>
-  <router-view v-slot="{ Component }">
-    <transition name="fade-slide" mode="out-in">
-      <component :is="Component || 'div'" />
-    </transition>
-  </router-view>
+  <div class="track-glass">
+    <router-view v-slot="{ Component }">
+      <transition name="fade-slide" mode="out-in">
+        <component :is="Component || 'div'" />
+      </transition>
+    </router-view>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -14,10 +16,12 @@ useTheme()
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import './styles/sci-fi.css';
+@import './styles/tokens.css';
 
 /* ========================================
    BRUTALIST TERMINAL — DARK-FIRST
    Cyan #00E5FF + Magenta #E040FB + Yellow #FFD600
+   （注：粗野风已收编至 .track-brutal 作用域，见文末 Element Plus 段）
    ======================================== */
 
 /* ========================================
@@ -119,7 +123,7 @@ useTheme()
   --c-warning: var(--c-warn);
   --c-warning-bg: var(--c-warn-bg);
 
-  /* Element Plus overrides */
+  /* Element Plus overrides (theme variables only — component shapes handled per-track) */
   --el-color-primary: var(--c-accent);
   --el-color-primary-dark-2: var(--c-accent-dark);
   --el-color-primary-light-3: #40EEFF;
@@ -294,7 +298,7 @@ h4 { font-size: 14px; line-height: 1.4; }
 .fade-slide-leave-to { opacity: 0; }
 
 /* ========================================
-   UTILITY CLASSES
+   UTILITY CLASSES（粗野组件，供 Track B 使用）
    ======================================== */
 .brutal-card {
   background: var(--c-card);
@@ -352,236 +356,382 @@ h4 { font-size: 14px; line-height: 1.4; }
 .text-yellow { color: var(--c-accent-3); }
 .text-mono { font-family: var(--font-mono); }
 
-/* ========================================
-   ELEMENT PLUS BRUTALIST TERMINAL OVERRIDES
-   ======================================== */
+/* ============================================================
+   ELEMENT PLUS — 双轨作用域覆盖
+   规则：组件形状按容器轨道切换，撤销旧系统全局 !important 强制。
+   - .track-glass  → 玻璃后台（圆角/毛玻璃/柔和影/无大写）
+   - .track-brutal → 粗野大屏（硬边/硬影/大写/尖角）
+   默认轨道为玻璃（App.vue 根容器 .track-glass）。
+   ============================================================ */
 
-/* Cards */
-.el-card {
-  background: var(--c-card) !important;
-  border: var(--bw) solid var(--c-border) !important;
-  border-radius: var(--radius-card) !important;
-  box-shadow: var(--shadow-hard) !important;
-  transition: box-shadow 0.12s ease, transform 0.12s ease !important;
+/* ---------- TRACK A · 玻璃后台（先定义）---------- */
+.track-glass {
+  /* Cards */
+  .el-card {
+    background: var(--surface) !important;
+    backdrop-filter: blur(var(--blur)) !important;
+    -webkit-backdrop-filter: blur(var(--blur)) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-2) !important;
+    color: var(--text) !important;
+    transition: box-shadow var(--motion) var(--ease), transform var(--motion) var(--ease) !important;
+  }
+  .el-card:hover {
+    box-shadow: var(--shadow-2), var(--glow) !important;
+    transform: translateY(-2px);
+  }
+  .el-card__header {
+    border-bottom: 1px solid var(--border) !important;
+    padding: 14px 18px !important;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .el-card__body { padding: 18px !important; }
+
+  /* Buttons */
+  .el-button--primary {
+    background: var(--primary) !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--brand-ink) !important;
+    font-weight: 600 !important;
+    box-shadow: var(--glow) !important;
+    transition: box-shadow var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease) !important;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .el-button--primary:hover {
+    box-shadow: var(--glow), 0 0 32px rgba(0,229,255,.30) !important;
+    transform: translateY(-1px);
+  }
+  .el-button--primary:active { transform: translateY(1px); box-shadow: var(--glow) !important; }
+  .el-button--primary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  .el-button--danger {
+    background: var(--danger) !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-md) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .el-button--danger:hover { box-shadow: 0 0 24px rgba(255,92,122,.40) !important; }
+  .el-button--danger:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+
+  .el-button {
+    border-radius: var(--radius-md) !important;
+    font-weight: 500 !important;
+    border-width: 1px !important;
+  }
+  .el-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+  /* Inputs */
+  .el-input__wrapper {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
+    transition: border-color var(--motion-fast) var(--ease) !important;
+  }
+  .el-input__wrapper:hover { border-color: var(--text-2) !important; }
+  .el-input__wrapper.is-focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(0,229,255,.18) !important;
+  }
+  .el-select .el-input__wrapper { border-radius: var(--radius-md) !important; }
+
+  /* Table（数据密集 — 保证可读性，走玻璃）*/
+  .el-table {
+    background: transparent !important;
+    --el-table-tr-bg-color: transparent;
+    --el-table-header-bg-color: var(--surface);
+    font-family: var(--font-sans);
+    font-size: 14px;
+  }
+  .el-table th.el-table__cell {
+    background: var(--surface) !important;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text-2) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .el-table td.el-table__cell {
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text);
+  }
+  .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background: rgba(255,255,255,.03) !important;
+  }
+
+  /* Dialog */
+  .el-dialog {
+    background: var(--surface-strong) !important;
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-2) !important;
+  }
+  .el-dialog__header {
+    border-bottom: 1px solid var(--border) !important;
+    padding: 16px 20px !important;
+    margin-right: 0 !important;
+  }
+  .el-dialog__body { padding: 20px !important; }
+  .el-dialog__footer { border-top: 1px solid var(--border) !important; padding: 12px 20px !important; }
+
+  /* Message Box */
+  .el-message-box {
+    background: var(--surface-strong) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-2) !important;
+  }
+
+  /* Dropdown */
+  .el-dropdown-menu {
+    background: var(--surface-strong) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-2) !important;
+  }
+
+  /* Menu（玻璃侧栏）*/
+  .el-menu { border-right: none !important; background: transparent !important; }
+  .el-menu-item, .el-sub-menu__title {
+    border-radius: var(--radius-md) !important;
+    margin: 2px 6px !important;
+    font-weight: 500 !important;
+  }
+  .el-menu-item.is-active {
+    background: rgba(0,229,255,.12) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    border-left: 3px solid var(--primary) !important;
+  }
+
+  /* Tags（圆角胶囊 + 语义淡底）*/
+  .el-tag {
+    border-radius: var(--radius-pill) !important;
+    border: 1px solid !important;
+    font-weight: 600 !important;
+    text-transform: none;
+    font-size: 12px;
+    letter-spacing: normal;
+  }
+
+  /* Pagination */
+  .el-pagination { --el-pagination-bg-color: transparent; }
+  .el-pagination .btn-prev, .el-pagination .btn-next, .el-pager li {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--surface) !important;
+    font-weight: 500 !important;
+  }
+  .el-pager li.is-active {
+    background: var(--primary) !important;
+    color: var(--brand-ink) !important;
+    border-color: transparent !important;
+  }
+
+  /* Steps */
+  .el-steps { background: transparent; }
+  .el-step__head { background: transparent; }
+
+  /* Tabs */
+  .el-tabs__header { border-bottom: 1px solid var(--border) !important; }
+  .el-tabs__item.is-active { color: var(--primary) !important; font-weight: 700 !important; }
+  .el-tabs__active-bar { background: var(--brand-magenta) !important; height: 2px !important; }
 }
 
-.el-card:hover {
-  box-shadow: var(--shadow-hover) !important;
-  transform: translate(-1px, -1px);
-}
+/* ---------- TRACK B · 粗野大屏（后定义，内层优先胜出）---------- */
+.track-brutal {
+  /* Cards */
+  .el-card {
+    background: var(--c-card) !important;
+    border: var(--bw) solid var(--c-border) !important;
+    border-radius: var(--radius-card) !important;
+    box-shadow: var(--shadow-hard) !important;
+    transition: box-shadow 0.12s ease, transform 0.12s ease !important;
+  }
+  .el-card:hover {
+    box-shadow: var(--shadow-hover) !important;
+    transform: translate(-1px, -1px);
+  }
+  .el-card__header {
+    border-bottom: var(--bw) solid var(--c-border) !important;
+    padding: 14px 18px !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .el-card__body { padding: 18px !important; }
 
-.el-card__header {
-  border-bottom: var(--bw) solid var(--c-border) !important;
-  padding: 14px 18px !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
+  /* Buttons */
+  .el-button--primary {
+    background: var(--c-accent) !important;
+    border: var(--bw) solid #000 !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--c-text-inverse) !important;
+    font-weight: 800 !important;
+    box-shadow: 4px 4px 0 0 #000 !important;
+    transition: all 0.12s ease !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .el-button--primary:hover {
+    box-shadow: 6px 6px 0 0 #000, var(--shadow-glow-cyan) !important;
+    transform: translate(-2px, -2px);
+  }
+  .el-button--primary:active {
+    box-shadow: none !important;
+    transform: translate(2px, 2px);
+  }
+  .el-button--danger {
+    background: var(--c-danger) !important;
+    border: var(--bw) solid #000 !important;
+    border-radius: var(--radius-md) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    box-shadow: 4px 4px 0 0 #000 !important;
+    transition: all 0.12s ease !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .el-button--danger:hover {
+    box-shadow: 6px 6px 0 0 #000 !important;
+    transform: translate(-2px, -2px);
+  }
+  .el-button {
+    border-radius: var(--radius-md) !important;
+    font-weight: 700 !important;
+    border-width: 2px !important;
+  }
 
-.el-card__body {
-  padding: 18px !important;
-}
+  /* Inputs */
+  .el-input__wrapper {
+    background: var(--c-bg-alt) !important;
+    border: var(--bw) solid var(--c-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
+    transition: border-color 0.12s ease !important;
+  }
+  .el-input__wrapper:hover { border-color: var(--c-text-tertiary) !important; }
+  .el-input__wrapper.is-focus {
+    border-color: var(--c-accent) !important;
+    box-shadow: 4px 4px 0 0 rgba(0,0,0,0.25) !important;
+  }
 
-/* Buttons */
-.el-button--primary {
-  background: var(--c-accent) !important;
-  border: var(--bw) solid #000 !important;
-  border-radius: var(--radius-md) !important;
-  color: var(--c-text-inverse) !important;
-  font-weight: 800 !important;
-  box-shadow: 4px 4px 0 0 #000 !important;
-  transition: all 0.12s ease !important;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+  /* Select */
+  .el-select .el-input__wrapper { border-radius: var(--radius-md) !important; }
 
-.el-button--primary:hover {
-  box-shadow: 6px 6px 0 0 #000, var(--shadow-glow-cyan) !important;
-  transform: translate(-2px, -2px);
-}
+  /* Table */
+  .el-table {
+    background: transparent !important;
+    --el-table-tr-bg-color: transparent;
+    --el-table-header-bg-color: var(--c-bg-alt);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .el-table th.el-table__cell {
+    background: var(--c-bg-alt) !important;
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--c-accent) !important;
+    border-bottom: var(--bw) solid var(--c-border) !important;
+  }
+  .el-table td.el-table__cell { border-bottom: 1px solid var(--c-border-light) !important; }
+  .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background: var(--c-bg-alt) !important;
+  }
 
-.el-button--primary:active {
-  box-shadow: none !important;
-  transform: translate(2px, 2px);
-}
+  /* Dialog */
+  .el-dialog {
+    background: var(--c-card) !important;
+    border: var(--bw-bold) solid var(--c-border) !important;
+    border-radius: var(--radius-card) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+  .el-dialog__header {
+    border-bottom: var(--bw) solid var(--c-border) !important;
+    padding: 16px 20px !important;
+    margin-right: 0 !important;
+  }
+  .el-dialog__body { padding: 20px !important; }
+  .el-dialog__footer {
+    border-top: var(--bw) solid var(--c-border) !important;
+    padding: 12px 20px !important;
+  }
 
-.el-button--danger {
-  background: var(--c-danger) !important;
-  border: var(--bw) solid #000 !important;
-  border-radius: var(--radius-md) !important;
-  color: #fff !important;
-  font-weight: 800 !important;
-  box-shadow: 4px 4px 0 0 #000 !important;
-  transition: all 0.12s ease !important;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+  /* Message Box */
+  .el-message-box {
+    background: var(--c-card) !important;
+    border: var(--bw-bold) solid var(--c-border) !important;
+    border-radius: var(--radius-card) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
 
-.el-button--danger:hover {
-  box-shadow: 6px 6px 0 0 #000 !important;
-  transform: translate(-2px, -2px);
-}
+  /* Dropdown */
+  .el-dropdown-menu {
+    background: var(--c-card) !important;
+    border: var(--bw) solid var(--c-border) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
 
-.el-button {
-  border-radius: var(--radius-md) !important;
-  font-weight: 700 !important;
-  border-width: 2px !important;
-}
+  /* Menu */
+  .el-menu { border-right: none !important; background: transparent !important; }
+  .el-menu-item, .el-sub-menu__title {
+    border-radius: var(--radius-md) !important;
+    margin: 2px 6px !important;
+    font-weight: 600 !important;
+  }
+  .el-menu-item.is-active {
+    background: var(--c-accent-bg) !important;
+    color: var(--c-accent) !important;
+    font-weight: 800 !important;
+    border-left: var(--bw) solid var(--c-accent) !important;
+  }
 
-/* Inputs */
-.el-input__wrapper {
-  background: var(--c-bg-alt) !important;
-  border: var(--bw) solid var(--c-border) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: none !important;
-  transition: border-color 0.12s ease !important;
-}
+  /* Tags */
+  .el-tag {
+    border-radius: var(--radius-sm) !important;
+    border: 2px solid !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
 
-.el-input__wrapper:hover {
-  border-color: var(--c-text-tertiary) !important;
-}
+  /* Pagination */
+  .el-pagination { --el-pagination-bg-color: transparent; }
+  .el-pagination .btn-prev, .el-pagination .btn-next, .el-pager li {
+    border: var(--bw) solid var(--c-border) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--c-card) !important;
+    font-weight: 700 !important;
+  }
+  .el-pager li.is-active {
+    background: var(--c-accent) !important;
+    color: var(--c-text-inverse) !important;
+    border-color: #000 !important;
+  }
 
-.el-input__wrapper.is-focus {
-  border-color: var(--c-accent) !important;
-  box-shadow: 4px 4px 0 0 rgba(0,0,0,0.25) !important;
-}
+  /* Steps */
+  .el-steps { background: transparent; }
+  .el-step__head { background: transparent; }
 
-/* Select */
-.el-select .el-input__wrapper {
-  border-radius: var(--radius-md) !important;
-}
-
-/* Table */
-.el-table {
-  background: transparent !important;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: var(--c-bg-alt);
-  font-family: var(--font-mono);
-  font-size: 13px;
-}
-
-.el-table th.el-table__cell {
-  background: var(--c-bg-alt) !important;
-  font-weight: 800;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.10em;
-  color: var(--c-accent) !important;
-  border-bottom: var(--bw) solid var(--c-border) !important;
-}
-
-.el-table td.el-table__cell {
-  border-bottom: 1px solid var(--c-border-light) !important;
-}
-
-.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
-  background: var(--c-bg-alt) !important;
-}
-
-/* Dialog */
-.el-dialog {
-  background: var(--c-card) !important;
-  border: var(--bw-bold) solid var(--c-border) !important;
-  border-radius: var(--radius-card) !important;
-  box-shadow: var(--shadow-lg) !important;
-}
-
-.el-dialog__header {
-  border-bottom: var(--bw) solid var(--c-border) !important;
-  padding: 16px 20px !important;
-  margin-right: 0 !important;
-}
-
-.el-dialog__body { padding: 20px !important; }
-
-.el-dialog__footer {
-  border-top: var(--bw) solid var(--c-border) !important;
-  padding: 12px 20px !important;
-}
-
-/* Message Box */
-.el-message-box {
-  background: var(--c-card) !important;
-  border: var(--bw-bold) solid var(--c-border) !important;
-  border-radius: var(--radius-card) !important;
-  box-shadow: var(--shadow-lg) !important;
-}
-
-/* Dropdown */
-.el-dropdown-menu {
-  background: var(--c-card) !important;
-  border: var(--bw) solid var(--c-border) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-md) !important;
-}
-
-/* Menu */
-.el-menu {
-  border-right: none !important;
-  background: transparent !important;
-}
-
-.el-menu-item,
-.el-sub-menu__title {
-  border-radius: var(--radius-md) !important;
-  margin: 2px 6px !important;
-  font-weight: 600 !important;
-}
-
-.el-menu-item.is-active {
-  background: var(--c-accent-bg) !important;
-  color: var(--c-accent) !important;
-  font-weight: 800 !important;
-  border-left: var(--bw) solid var(--c-accent) !important;
-}
-
-/* Tags */
-.el-tag {
-  border-radius: var(--radius-sm) !important;
-  border: 2px solid !important;
-  font-weight: 700 !important;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-}
-
-/* Pagination */
-.el-pagination {
-  --el-pagination-bg-color: transparent;
-}
-
-.el-pagination .btn-prev,
-.el-pagination .btn-next,
-.el-pager li {
-  border: var(--bw) solid var(--c-border) !important;
-  border-radius: var(--radius-md) !important;
-  background: var(--c-card) !important;
-  font-weight: 700 !important;
-}
-
-.el-pager li.is-active {
-  background: var(--c-accent) !important;
-  color: var(--c-text-inverse) !important;
-  border-color: #000 !important;
-}
-
-/* Steps */
-.el-steps { background: transparent; }
-.el-step__head { background: transparent; }
-
-/* Tabs */
-.el-tabs__header {
-  border-bottom: var(--bw) solid var(--c-border) !important;
-}
-
-.el-tabs__item.is-active {
-  color: var(--c-accent) !important;
-  font-weight: 800 !important;
-}
-
-.el-tabs__active-bar {
-  background: var(--c-accent-2) !important;
-  height: 3px !important;
+  /* Tabs */
+  .el-tabs__header { border-bottom: var(--bw) solid var(--c-border) !important; }
+  .el-tabs__item.is-active { color: var(--c-accent) !important; font-weight: 800 !important; }
+  .el-tabs__active-bar { background: var(--c-accent-2) !important; height: 3px !important; }
 }
 
 /* ========================================
@@ -598,7 +748,7 @@ h4 { font-size: 14px; line-height: 1.4; }
 }
 
 /* ========================================
-   REDUCED MOTION
+   REDUCED MOTION（覆盖双轨 hover 位移）
    ======================================== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -606,7 +756,9 @@ h4 { font-size: 14px; line-height: 1.4; }
     transition-duration: 0.01ms !important;
   }
   .brutal-card:hover,
-  .el-card:hover,
-  .el-button--primary:hover { transform: none; }
+  .track-glass .el-card:hover,
+  .track-glass .el-button--primary:hover,
+  .track-brutal .el-card:hover,
+  .track-brutal .el-button--primary:hover { transform: none !important; }
 }
 </style>
