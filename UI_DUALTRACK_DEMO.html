@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智课考勤 · 双轨 UI 设计系统 Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root{
+    /* ===== Shared brand palette (双轨共用) ===== */
+    --cyan:#00E5FF; --magenta:#E040FB; --yellow:#FFD600;
+    --bg:#0D0D0F; --bg-alt:#15151A; --card:#16161C; --card-2:#1C1C24;
+    --text:#F0F0F5; --text-2:#9AA0B0; --text-3:#62656F;
+    --border:#26262E; --border-2:#33333D;
+    --success:#00E676; --danger:#FF1744; --warn:#FFD600;
+    --ui:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+    --mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--ui);background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .doc{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+
+  /* ===== Header ===== */
+  .doc-head{margin-bottom:36px}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);padding:6px 12px;border-radius:999px}
+  .doc-head h1{font-size:34px;font-weight:800;letter-spacing:-.03em;margin:16px 0 10px}
+  .doc-head p{color:var(--text-2);font-size:15px;max-width:760px}
+  .track-pills{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;border-radius:10px;border:1px solid var(--border-2);background:var(--card)}
+  .pill.a{border-color:rgba(0,229,255,.35)}
+  .pill.b{border-color:rgba(224,64,251,.35)}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .dot.c{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .dot.m{background:var(--magenta);box-shadow:0 0 8px var(--magenta)}
+
+  /* ===== Section ===== */
+  .sec-title{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin:48px 0 16px}
+
+  /* ===== Token board ===== */
+  .tokens{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .tcard{border:1px solid var(--border);border-radius:16px;padding:20px;background:var(--card)}
+  .tcard h3{font-size:16px;font-weight:700;margin-bottom:4px}
+  .tcard .sub{font-size:13px;color:var(--text-2);margin-bottom:16px}
+  .swatches{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .sw{width:46px;height:46px;border-radius:10px;border:1px solid var(--border-2)}
+  .legend{font-size:12px;color:var(--text-3);font-family:var(--mono)}
+  .props{display:grid;gap:10px;font-size:13px}
+  .props div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--border)}
+  .props b{font-family:var(--mono);color:var(--text)}
+  .props span{color:var(--text-2)}
+  .specimen{border-radius:12px;padding:14px;margin-top:14px;font-weight:700}
+  .sp-glass{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);color:var(--text)}
+  .sp-brutal{background:var(--card-2);border:3px solid var(--cyan);box-shadow:4px 4px 0 #000;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em}
+
+  /* ===== Screens ===== */
+  .screen-label{display:flex;align-items:center;gap:10px;margin:40px 0 14px}
+  .screen-label .tag{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px}
+  .tag.glass{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.35)}
+  .tag.brutal{background:rgba(224,64,251,.12);color:var(--magenta);border:1px solid rgba(224,64,251,.35)}
+  .screen-label h2{font-size:20px;font-weight:800;letter-spacing:-.02em}
+  .screen-frame{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--bg)}
+
+  /* ===== TRACK A: Glass admin ===== */
+  .glass-wrap{display:grid;grid-template-columns:210px 1fr;min-height:560px}
+  .g-side{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,.1);padding:18px 12px}
+  .g-logo{display:flex;align-items:center;gap:10px;padding:6px 8px 16px}
+  .g-logo .ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--magenta));display:flex;align-items:center;justify-content:center}
+  .g-logo b{font-size:15px;font-weight:800}
+  .g-logo small{display:block;font-size:10px;color:var(--text-3);letter-spacing:.1em;text-transform:uppercase}
+  .g-nav{display:flex;flex-direction:column;gap:2px}
+  .g-nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:13px;color:var(--text-2);text-decoration:none;font-weight:500}
+  .g-nav a .i{width:16px;height:16px;border-radius:5px;background:var(--border-2)}
+  .g-nav a.active{background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;box-shadow:inset 2px 0 0 var(--cyan)}
+  .g-main{padding:20px 22px}
+  .g-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .g-top h2{font-size:20px;font-weight:800}
+  .g-top .meta{font-size:12px;color:var(--text-3);font-family:var(--mono)}
+  .g-user{display:flex;align-items:center;gap:8px}
+  .g-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--magenta),var(--cyan))}
+  .bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);border-radius:14px;padding:14px 16px;position:relative;overflow:hidden}
+  .stat .k{font-size:12px;color:var(--text-2);font-weight:600}
+  .stat .v{font-family:var(--mono);font-size:26px;font-weight:700;margin-top:4px}
+  .stat .u{font-size:12px;color:var(--text-3);margin-left:3px}
+  .stat.c{border-color:rgba(0,229,255,.4)} .stat.c .v{color:var(--cyan)}
+  .stat.m{border-color:rgba(224,64,251,.4)} .stat.m .v{color:var(--magenta)}
+  .stat.y{border-color:rgba(255,214,0,.4)} .stat.y .v{color:var(--yellow)}
+  .stat.r{border-color:rgba(255,23,68,.4)} .stat.r .v{color:var(--danger)}
+  .row2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+  .panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);border-radius:14px;padding:16px}
+  .panel h4{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .panel h4 .more{font-size:11px;color:var(--cyan);font-weight:600}
+  .chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:6px}
+  .chart .bar{flex:1;background:linear-gradient(180deg,var(--cyan),rgba(0,229,255,.15));border-radius:6px 6px 0 0}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--border)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);font-weight:700}
+  td{color:var(--text)}
+  .mono{font-family:var(--mono)}
+  .st{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .st.ok{background:rgba(0,230,118,.12);color:var(--success)}
+  .st.warn{background:rgba(255,214,0,.12);color:var(--yellow)}
+  .st.bad{background:rgba(255,23,68,.12);color:var(--danger)}
+  .g-cta{margin-top:16px;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--cyan),#19b9ff);color:#04141a;font-weight:800;font-size:14px;padding:11px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(0,229,255,.3)}
+  .g-cta .i{width:14px;height:14px;border-radius:4px;background:#04141a}
+
+  /* ===== TRACK B: Brutal monitor ===== */
+  .brutal-wrap{position:relative;background:#070709;padding:22px;overflow:hidden}
+  .brutal-wrap .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.035) 3px,rgba(0,229,255,.035) 4px);pointer-events:none}
+  .b-head{display:flex;justify-content:space-between;align-items:center;border:3px solid var(--border-2);background:var(--card-2);padding:12px 16px;margin-bottom:16px;position:relative;z-index:1}
+  .b-head .t{font-family:var(--mono);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:15px}
+  .b-head .t .live{color:var(--danger)}
+  .b-head .pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--danger);box-shadow:0 0 8px var(--danger);animation:p 1.6s infinite;margin-right:6px;vertical-align:middle}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
+  .b-head .cam{font-family:var(--mono);font-size:12px;color:var(--text-2)}
+  .b-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;position:relative;z-index:1}
+  .bstat{border:3px solid var(--border-2);background:var(--card-2);box-shadow:4px 4px 0 #000;padding:12px}
+  .bstat.cy{border-color:var(--cyan);box-shadow:4px 4px 0 #000,0 0 14px rgba(0,229,255,.25)}
+  .bstat.mg{border-color:var(--magenta);box-shadow:4px 4px 0 #000,0 0 14px rgba(224,64,251,.25)}
+  .bstat.ye{border-color:var(--yellow);box-shadow:4px 4px 0 #000,0 0 14px rgba(255,214,0,.25)}
+  .bstat .k{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2)}
+  .bstat .v{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--text)}
+  .bstat.cy .v{color:var(--cyan)} .bstat.mg .v{color:var(--magenta)} .bstat.ye .v{color:var(--yellow)}
+  .b-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;position:relative;z-index:1}
+  .bpanel{border:3px solid var(--border-2);background:var(--card-2);box-shadow:4px 4px 0 #000;padding:16px}
+  .bpanel h4{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan);margin-bottom:14px;border-bottom:2px solid var(--border-2);padding-bottom:8px}
+  .bars{display:flex;flex-direction:column;gap:12px}
+  .brow{display:grid;grid-template-columns:80px 1fr 40px;gap:10px;align-items:center;font-family:var(--mono);font-size:12px}
+  .brow .lab{text-transform:uppercase;color:var(--text-2)}
+  .brow .track{height:16px;background:#0c0c10;border:2px solid var(--border-2)}
+  .brow .fill{height:100%;border-right:2px solid #000}
+  .brow .fill.cy{background:var(--cyan)} .brow .fill.mg{background:var(--magenta)} .brow .fill.ye{background:var(--yellow)} .brow .fill.rd{background:var(--danger)} .brow .fill.gr{background:var(--success)}
+  .brow .num{text-align:right;color:var(--text)}
+  .alert{border:3px solid var(--danger);background:rgba(255,23,68,.06);box-shadow:4px 4px 0 #000,0 0 16px rgba(255,23,68,.3);padding:14px;margin-top:14px;position:relative;z-index:1}
+  .alert .h{font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--danger);margin-bottom:6px}
+  .alert .body{font-family:var(--mono);font-size:13px;color:var(--text)}
+  .cam-frame{border:3px solid var(--cyan);background:#050507;box-shadow:inset 0 0 30px rgba(0,229,255,.08);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .cam-frame .cross{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.12) 1px,transparent 1px);background-size:32px 32px}
+  .cam-frame .center{font-family:var(--mono);color:var(--cyan);font-size:13px;letter-spacing:.1em;border:2px solid var(--cyan);padding:8px 14px;background:rgba(0,229,255,.06)}
+
+  footer{margin-top:48px;border-top:1px solid var(--border);padding-top:20px;font-size:13px;color:var(--text-3)}
+
+  @media(max-width:860px){
+    .tokens{grid-template-columns:1fr}
+    .glass-wrap{grid-template-columns:1fr}
+    .g-side{display:none}
+    .bento{grid-template-columns:repeat(2,1fr)}
+    .b-stats{grid-template-columns:repeat(2,1fr)}
+    .row2,.b-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <header class="doc-head">
+    <span class="eyebrow">● UI Designer · 双轨设计系统原型</span>
+    <h1>智课考勤 · 双轨 UI Demo</h1>
+    <p>同一套品牌霓虹(cyan / magenta / yellow),两种"处理手法":<b>后台管理用玻璃拟态</b>(克制、柔和、易读),<b>监控大屏用粗野科幻</b>(硬边、霓虹辉光、冲击力强)。下面直接看效果。</p>
+    <div class="track-pills">
+      <span class="pill a"><span class="dot c"></span>轨道 A · 玻璃拟态后台(管理员/教师日常)</span>
+      <span class="pill b"><span class="dot m"></span>轨道 B · 粗野科幻大屏(行为监控/数字孪生)</span>
+    </div>
+  </header>
+
+  <!-- ===== Token board ===== -->
+  <div class="sec-title">01 · 共享 Design Token</div>
+  <div class="tokens">
+    <div class="tcard">
+      <h3>品牌色板(双轨共用)</h3>
+      <div class="sub">保持同一套霓虹,让两个轨道像"一个产品"</div>
+      <div class="swatches">
+        <div class="sw" style="background:var(--cyan)"></div>
+        <div class="sw" style="background:var(--magenta)"></div>
+        <div class="sw" style="background:var(--yellow)"></div>
+        <div class="sw" style="background:var(--success)"></div>
+        <div class="sw" style="background:var(--danger)"></div>
+        <div class="sw" style="background:var(--card)"></div>
+        <div class="sw" style="background:var(--border)"></div>
+      </div>
+      <div class="legend">--cyan #00E5FF · --magenta #E040FB · --yellow #FFD600<br>--success #00E676 · --danger #FF1744</div>
+    </div>
+
+    <div class="tcard">
+      <h3>两套处理手法对比</h3>
+      <div class="sub">同一个色,用不同"语气"说不同的话</div>
+      <div class="props">
+        <div><span>圆角 Radius</span><b>A 14–16px / B 0–4px</b></div>
+        <div><span>边框 Border</span><b>A 1px 半透 / B 3px 实色</b></div>
+        <div><span>阴影 Shadow</span><b>A 柔光模糊 / B 4px 硬黑影</b></div>
+        <div><span>霓虹用法</span><b>A 点缀(主操作/高亮) / B 主视觉</b></div>
+        <div><span>字体</span><b>A Inter+Mono / B Mono 大写</b></div>
+      </div>
+      <div class="specimen sp-glass">Glass · 出勤率 96.2%</div>
+      <div class="specimen sp-brutal">Brutal · LIVE MONITOR</div>
+    </div>
+  </div>
+
+  <!-- ===== TRACK A ===== -->
+  <div class="screen-label"><span class="tag glass">轨道 A · 玻璃拟态</span><h2>管理后台 · 考勤总览</h2></div>
+  <div class="screen-frame">
+    <div class="glass-wrap">
+      <aside class="g-side">
+        <div class="g-logo">
+          <div class="ic"></div>
+          <div><b>智课考勤</b><small>管理端</small></div>
+        </div>
+        <nav class="g-nav">
+          <a class="active"><span class="i"></span>首页</a>
+          <a><span class="i"></span>班级管理</a>
+          <a><span class="i"></span>学生管理</a>
+          <a><span class="i"></span>课程管理</a>
+          <a><span class="i"></span>考勤记录</a>
+          <a><span class="i"></span>行为监控</a>
+          <a><span class="i"></span>请假管理</a>
+          <a><span class="i"></span>二维码签到</a>
+          <a><span class="i"></span>数据统计</a>
+        </nav>
+      </aside>
+      <main class="g-main">
+        <div class="g-top">
+          <div><h2>考勤总览</h2><div class="meta">2026-08-07 · 第 2 周</div></div>
+          <div class="g-user"><div class="g-avatar"></div></div>
+        </div>
+
+        <div class="bento">
+          <div class="stat c"><div class="k">总出勤率</div><div class="v">96.2<span class="u">%</span></div></div>
+          <div class="stat y"><div class="k">迟到</div><div class="v">12<span class="u">人</span></div></div>
+          <div class="stat r"><div class="k">缺勤</div><div class="v">3<span class="u">人</span></div></div>
+          <div class="stat m"><div class="k">行为预警</div><div class="v">5<span class="u">次</span></div></div>
+        </div>
+
+        <div class="row2">
+          <div class="panel">
+            <h4>出勤率趋势(近 7 天) <span class="more">查看</span></h4>
+            <div class="chart">
+              <div class="bar" style="height:62%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:80%"></div>
+              <div class="bar" style="height:74%"></div>
+              <div class="bar" style="height:90%"></div>
+              <div class="bar" style="height:96%"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h4>今日考勤记录 <span class="more">全部</span></h4>
+            <table>
+              <thead><tr><th>班级</th><th>应到</th><th>实到</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td>计科2301</td><td class="mono">45</td><td class="mono">44</td><td><span class="st ok">正常</span></td></tr>
+                <tr><td>软件2302</td><td class="mono">48</td><td class="mono">45</td><td><span class="st warn">迟到</span></td></tr>
+                <tr><td>网络2303</td><td class="mono">42</td><td class="mono">39</td><td><span class="st bad">缺勤</span></td></tr>
+                <tr><td>人工智能2304</td><td class="mono">50</td><td class="mono">50</td><td><span class="st ok">正常</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="g-cta"><span class="i"></span>发起二维码签到</div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== TRACK B ===== -->
+  <div class="screen-label"><span class="tag brutal">轨道 B · 粗野科幻</span><h2>行为监控大屏 · 实时</h2></div>
+  <div class="screen-frame">
+    <div class="brutal-wrap">
+      <div class="scan"></div>
+      <div class="b-head">
+        <div class="t"><span class="live"><span class="pulse"></span>LIVE</span> · 实时行为监控 / 教室 A-301</div>
+        <div class="cam">CAM 01 · YOLOv8 · mAP@50 85.9%</div>
+      </div>
+
+      <div class="b-stats">
+        <div class="bstat cy"><div class="k">在课人数</div><div class="v">48</div></div>
+        <div class="bstat"><div class="k">举手</div><div class="v">6</div></div>
+        <div class="bstat"><div class="k">写字</div><div class="v">22</div></div>
+        <div class="bstat ye"><div class="k">睡觉</div><div class="v">1</div></div>
+        <div class="bstat mg"><div class="k">玩手机</div><div class="v">2</div></div>
+      </div>
+
+      <div class="b-grid">
+        <div class="bpanel">
+          <h4>课堂行为分布</h4>
+          <div class="bars">
+            <div class="brow"><span class="lab">写字</span><div class="track"><div class="fill cy" style="width:78%"></div></div><span class="num">22</span></div>
+            <div class="brow"><span class="lab">举手</span><div class="track"><div class="fill gr" style="width:21%"></div></div><span class="num">6</span></div>
+            <div class="brow"><span class="lab">听讲</span><div class="track"><div class="fill mg" style="width:46%"></div></div><span class="num">13</span></div>
+            <div class="brow"><span class="lab">玩手机</span><div class="track"><div class="fill rd" style="width:7%"></div></div><span class="num">2</span></div>
+            <div class="brow"><span class="lab">睡觉</span><div class="track"><div class="fill ye" style="width:4%"></div></div><span class="num">1</span></div>
+          </div>
+          <div class="alert">
+            <div class="h">⚠ 异常预警</div>
+            <div class="body">检测到 1 名学生睡觉 @ 3排2列 · 已推送教师端</div>
+          </div>
+        </div>
+
+        <div class="bpanel">
+          <h4>画面预览</h4>
+          <div class="cam-frame">
+            <div class="cross"></div>
+            <div class="center">● REC · A-301</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    说明:本页为静态视觉原型,用于验证双轨决策方向。后端/前端代码尚未改动;确认方向后,我会把 Token 收敛进 App.vue,并按轨道 A/B 分别改版真实页面。
+  </footer>
+</div>
+</body>
+</html>

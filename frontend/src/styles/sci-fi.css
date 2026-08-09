@@ -1,0 +1,329 @@
+/* ========================================
+   BRUTALIST TERMINAL — SCI-FI EFFECTS
+   Cyan #00E5FF + Magenta #E040FB + Yellow #FFD600
+   ======================================== */
+
+/* --- Scan-line overlay --- */
+.scan-lines {
+  position: relative;
+  overflow: hidden;
+}
+.scan-lines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--c-scan-line) 2px,
+    var(--c-scan-line) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+  animation: scanMove 8s linear infinite;
+}
+@keyframes scanMove {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* --- Neon glow --- */
+.neon-glow {
+  box-shadow: 0 0 8px var(--c-neon-glow), 0 0 16px rgba(0, 229, 255, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+.neon-glow:hover {
+  box-shadow: 0 0 14px var(--c-neon-glow-hover), 0 0 28px rgba(0, 229, 255, 0.25), 0 0 48px rgba(0, 229, 255, 0.10);
+}
+.neon-glow-green {
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.35), 0 0 16px rgba(0, 230, 118, 0.15);
+}
+.neon-glow-red {
+  box-shadow: 0 0 8px rgba(255, 23, 68, 0.35), 0 0 16px rgba(255, 23, 68, 0.15);
+}
+.neon-glow-magenta {
+  box-shadow: 0 0 8px rgba(224, 64, 251, 0.35), 0 0 16px rgba(224, 64, 251, 0.15);
+}
+
+/* --- Data stream text --- */
+.data-stream-text {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  color: var(--c-accent);
+  letter-spacing: 0.06em;
+  animation: dataPulse 2s ease-in-out infinite;
+}
+@keyframes dataPulse {
+  0%, 100% { opacity: 0.8; text-shadow: 0 0 4px var(--c-neon-glow); }
+  50% { opacity: 1; text-shadow: 0 0 16px var(--c-neon-glow), 0 0 32px rgba(0, 229, 255, 0.25); }
+}
+
+/* --- Glitch effect --- */
+.glitch-text {
+  animation: glitchSkew 0.5s ease-in-out infinite alternate;
+}
+@keyframes glitchSkew {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 1px); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+/* --- Flowing gradient border — Cyan→Magenta→Yellow --- */
+.glowing-border {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.glowing-border::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    var(--c-accent),
+    var(--c-accent-2),
+    var(--c-accent-3),
+    var(--c-accent),
+    var(--c-accent-2),
+    var(--c-accent)
+  );
+  animation: spinBorder 3s linear infinite;
+  z-index: 0;
+}
+.glowing-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: var(--c-card);
+  z-index: 0;
+}
+.glowing-border > * {
+  position: relative;
+  z-index: 1;
+}
+@keyframes spinBorder {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Frosted glass --- */
+.frosted-glass {
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: var(--radius-md);
+}
+
+.frosted-glass-strong {
+  background: var(--c-glass-bg-strong);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--c-glass-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--c-glass-shadow);
+}
+
+/* --- Sidebar glass --- */
+.sidebar-glass {
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border);
+}
+
+.sidebar-glass-strong {
+  background: var(--c-glass-bg-strong);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-right: 1px solid var(--c-glass-border-strong);
+  box-shadow: var(--c-glass-shadow);
+}
+
+/* --- Noise overlay — 噪点纹理 --- */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  border-radius: inherit;
+}
+.noise-overlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="dark"] .noise-overlay::after {
+  opacity: 0.05;
+}
+
+/* --- Data readout --- */
+.data-readout {
+  font-family: 'JetBrains Mono', 'Source Code Pro', monospace;
+  color: var(--c-accent);
+  letter-spacing: 0.12em;
+}
+
+/* --- Sci-fi card variant --- */
+.el-card.sci-fi-card {
+  border: 2px solid rgba(0, 229, 255, 0.18);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.08);
+  background: var(--c-card);
+}
+
+[data-theme="dark"] .el-card.sci-fi-card {
+  border: 2px solid rgba(0, 229, 255, 0.20);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.10);
+}
+
+/* --- Active monitoring pulse --- */
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-success);
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(0, 230, 118, 0.4); }
+  50% { box-shadow: 0 0 14px rgba(0, 230, 118, 0.8), 0 0 28px rgba(0, 230, 118, 0.4); }
+}
+
+/* --- Data flow lines --- */
+.data-flow-line {
+  position: relative;
+  overflow: hidden;
+}
+.data-flow-line::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c-accent), transparent);
+  animation: flowRight 2.5s linear infinite;
+}
+@keyframes flowRight {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* --- Hologram effect --- */
+.hologram {
+  border: 2px solid rgba(0, 229, 255, 0.35);
+  box-shadow:
+    inset 0 0 20px rgba(0, 229, 255, 0.06),
+    0 0 12px rgba(0, 229, 255, 0.12);
+}
+
+[data-theme="dark"] .hologram {
+  border: 2px solid rgba(0, 229, 255, 0.35);
+  box-shadow:
+    inset 0 0 24px rgba(0, 229, 255, 0.10),
+    0 0 14px rgba(224, 64, 251, 0.12);
+}
+
+/* Terminal cursor effect */
+.terminal-cursor::after {
+  content: '_';
+  color: var(--c-accent);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-lines::after,
+  .glowing-border::before,
+  .data-stream-text,
+  .data-flow-line::after,
+  .pulse-dot,
+  .terminal-cursor::after {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   BENTO GRID — Glassmorphism 2.0 Utilities
+   ======================================== */
+
+.bento-card {
+  background: var(--c-glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--c-glass-border);
+  border-radius: 18px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.bento-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--c-glass-border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--c-glass-border-strong);
+}
+
+.bento-card-accent {
+  border-left: 3px solid var(--c-accent);
+}
+
+.bento-card-magenta {
+  border-left: 3px solid var(--c-accent-2);
+}
+
+.bento-card-yellow {
+  border-left: 3px solid var(--c-accent-3);
+}
+
+.bento-card-green {
+  border-left: 3px solid var(--c-success);
+}
+
+.bento-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.bento-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.bento-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .bento-grid-2,
+  .bento-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+}

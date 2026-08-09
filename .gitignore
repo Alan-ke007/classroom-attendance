@@ -1,0 +1,68 @@
+# Java
+target/
+*.jar
+*.war
+*.nar
+*.ear
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+out/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+backend.log
+npm-debug.log*
+
+# Env
+.env
+.env.local
+*.local
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Models (too large for git, download separately)
+algorithm-service/models/*.pt
+!algorithm-service/models/.gitkeep
+
+# Temp
+temp/
+tmp/
