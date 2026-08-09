@@ -39,3 +39,8 @@ export function getAttendancesByDateRange(startDate, endDate) {
 export function calculateAttendanceRate(studentId, startDate, endDate) {
   return request({ url: `/attendance/rate/${studentId}`, method: 'get', params: { startDate, endDate } })
 }
+
+// F9 管理端人脸复核列表：按 faceStatus(默认 NEED_REVIEW) 筛选，需 admin/teacher 角色
+export function getFaceReviewList(params) {
+  return request({ url: '/attendance/face-review', method: 'get', params })
+}

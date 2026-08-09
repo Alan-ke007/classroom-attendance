@@ -34,6 +34,13 @@
             <el-option label="请假" value="leave" />
           </el-select>
         </el-form-item>
+        <el-form-item label="人脸核验">
+          <el-select v-model="searchForm.faceStatus" placeholder="全部" clearable>
+            <el-option label="待复核" value="NEED_REVIEW" />
+            <el-option label="通过" value="VERIFIED" />
+            <el-option label="拒绝" value="REJECTED" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="日期范围">
           <el-date-picker
             v-model="searchForm.dateRange"
@@ -46,6 +53,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="loadAttendanceList">查询</el-button>
+          <el-button type="warning" @click="loadNeedReview">仅看待复核</el-button>
           <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
@@ -65,6 +73,13 @@
         </el-table-column>
         <el-table-column prop="checkInTime" label="签到时间" width="180" />
         <el-table-column prop="confidence" label="置信度" width="100" />
+        <el-table-column prop="faceStatus" label="人脸核验" width="120">
+          <template #default="scope">
+            <el-tag :type="getFaceStatusType(scope.row.faceStatus)">
+              {{ getFaceStatusText(scope.row.faceStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
@@ -129,6 +144,7 @@ import { ref, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, Document } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { getFaceReviewList } from '@/api/attendance'
 
 const isMobile = computed(() => window.innerWidth < 768)
 const loading = ref(false)
@@ -145,6 +161,7 @@ const dialogTitle = ref('添加考勤记录')
 const searchForm = ref({
   studentName: '',
   status: '',
+  faceStatus: '',
   dateRange: null
 })
 const form = ref({
@@ -192,7 +209,18 @@ const loadAttendanceList = async () => {
       params.startDate = searchForm.value.dateRange[0]
       params.endDate = searchForm.value.dateRange[1]
     }
-    const res = await request.get('/attendance/list', { params })
+    let res
+    if (searchForm.value.faceStatus) {
+      // F9：管理端人脸复核筛选，走专用端点（admin/teacher）
+      res = await getFaceReviewList({
+        pageNum: params.pageNum,
+        pageSize: params.pageSize,
+        faceStatus: searchForm.value.faceStatus,
+        studentName: params.studentName
+      })
+    } else {
+      res = await request.get('/attendance/list', { params })
+    }
     attendanceList.value = res.data.records || []
     total.value = res.data.total || 0
   } catch (error) {
@@ -200,6 +228,12 @@ const loadAttendanceList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// F9 便捷入口：仅看待复核(NEED_REVIEW)的人脸签到记录
+const loadNeedReview = () => {
+  searchForm.value.faceStatus = 'NEED_REVIEW'
+  loadAttendanceList()
 }
 
 const loadStudentList = async () => {
@@ -277,7 +311,7 @@ const handleDelete = async (row) => {
 }
 
 const resetSearch = () => {
-  searchForm.value = { studentName: '', status: '', dateRange: null }
+  searchForm.value = { studentName: '', status: '', faceStatus: '', dateRange: null }
   loadAttendanceList()
 }
 
@@ -299,6 +333,25 @@ const getStatusText = (status) => {
     leave: '请假'
   }
   return textMap[status] || status
+}
+
+// F9：人脸核验状态展示
+const getFaceStatusType = (faceStatus) => {
+  const typeMap = {
+    NEED_REVIEW: 'warning',
+    VERIFIED: 'success',
+    REJECTED: 'danger'
+  }
+  return typeMap[faceStatus] || 'info'
+}
+
+const getFaceStatusText = (faceStatus) => {
+  const textMap = {
+    NEED_REVIEW: '待复核',
+    VERIFIED: '通过',
+    REJECTED: '拒绝'
+  }
+  return textMap[faceStatus] || '—'
 }
 
 // 导出PDF
