@@ -8,20 +8,80 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)
 
-# ========== 参数配置 ==========
+# ========== P0 安全配置 [审计报告 C2] ==========
+
+# [C2-#4] CORS 白名单：仅放行受信来源，禁止 "*"
+# 来源：环境变量 ALGORITHM_CORS_ORIGINS（逗号分隔），默认空（不向任何跨域来源放行）
+ALGORITHM_CORS_ORIGINS = [
+    o.strip() for o in os.environ.get('ALGORITHM_CORS_ORIGINS', '').split(',') if o.strip()
+]
+CORS(app, origins=ALGORITHM_CORS_ORIGINS, supports_credentials=False)
+
+# [C2-#2] API Key 鉴权：从环境变量读取，缺失仅告警、不阻断启动
+ALGORITHM_API_KEY = os.environ.get('ALGORITHM_API_KEY')
+if not ALGORITHM_API_KEY:
+    app.logger.warning(
+        "⚠ ALGORITHM_API_KEY 未设置！所有受保护接口将拒绝访问(401)。"
+        "请通过环境变量注入密钥，切勿硬编码到代码中。"
+    )
+
+# [C2-#5] 推理设备：仅 CUDA 启用 FP16，避免 CPU 部署因 half 推理直接 500
+DEVICE = os.environ.get('DEVICE', 'cpu').lower()
+USE_FP16 = (DEVICE == 'cuda')
+
+# [C2-#3] 上传限制：默认 50MB 上限（可用 ALGORITHM_MAX_UPLOAD_MB 调整）
+app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('ALGORITHM_MAX_UPLOAD_MB', '50')) * 1024 * 1024
+
+# [C2-#3] 强制 torch.load 安全加载：默认 weights_only=True，阻断 pickle 任意代码执行
+# （torch>=2.6 原生默认即 True；此处显式兜底，兼容旧版本）
+try:
+    import torch
+    _orig_torch_load = torch.load
+
+    def _safe_torch_load(*args, **kwargs):
+        kwargs.setdefault('weights_only', True)
+        return _orig_torch_load(*args, **kwargs)
+
+    torch.load = _safe_torch_load
+except Exception:
+    pass  # torch 不可用时跳过（YOLO 加载阶段会自行报错）
+
+# ========== 业务参数配置 ==========
 BEHAVIOR_CONF_THRESHOLD = 0.20  # 行为检测置信度阈值
-IOU_THRESHOLD = 0.5             # NMS IOU阈值
+IOU_THRESHOLD = 0.5             # NMS IOU 阈值
 BEHAVIOR_IMGSZ = 640            # 行为检测输入分辨率
-USE_FP16 = True                 # 半精度推理 (提速)
-TTA_ENABLED = False             # TTA增强
+TTA_ENABLED = False             # TTA 增强
 
 # 模型文件路径
 BEHAVIOR_MODEL_PATH = 'models/behavior_best.pt'
 YOLO_BEHAVIOR_FALLBACK = 'yolov8n.pt'    # 备用行为检测
 
 # =============================
+
+
+# ========== 鉴权中间件 [C2-#2] ==========
+def _check_auth():
+    """校验请求头中的 API Key：Authorization: Bearer <key> 或 X-API-Key: <key>"""
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        token = auth_header[len('Bearer '):].strip()
+        if token and token == ALGORITHM_API_KEY:
+            return True
+    x_key = request.headers.get('X-API-Key', '').strip()
+    if x_key and x_key == ALGORITHM_API_KEY:
+        return True
+    return False
+
+
+@app.before_request
+def _require_auth():
+    # 免鉴权：健康检查 & CORS 预检请求
+    if request.path == '/health' or request.method == 'OPTIONS':
+        return None
+    # 未配置密钥或密钥无效，一律 401（空密钥不可被绕过）
+    if not ALGORITHM_API_KEY or not _check_auth():
+        return jsonify({'code': 401, 'message': '未授权：缺少或无效的 API Key'}), 401
 
 # 全局变量存储模型
 behavior_model = None
@@ -74,12 +134,14 @@ def load_models():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """健康检查接口"""
+    """健康检查接口 [C2-#7] 如实反映模型就绪状态，未就绪返回 503"""
+    ready = behavior_model is not None
     return jsonify({
-        'status': 'ok',
-        'message': 'Algorithm service is running',
+        'status': 'ok' if ready else 'degraded',
+        'model_loaded': ready,
+        'message': 'Algorithm service is running' if ready else 'Model not loaded yet',
         'timestamp': datetime.now().isoformat()
-    })
+    }), 200 if ready else 503
 
 @app.route('/api/behavior/detect', methods=['POST'])
 def detect_behavior():
@@ -94,9 +156,14 @@ def detect_behavior():
                 'message': '行为检测模型未加载'
             }), 500
 
-        data = request.json
+        # [C2-#6] 输入校验：必须是 JSON 且 body 非空
+        if not request.is_json:
+            return jsonify({'code': 400, 'message': '请求必须为 JSON'}), 400
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict) or not data:
+            return jsonify({'code': 400, 'message': '请求体为空或格式错误'}), 400
 
-        # 获取base64编码的图片
+        # 获取 base64 编码的图片
         image_base64 = data.get('image', '')
 
         if not image_base64:
@@ -105,8 +172,20 @@ def detect_behavior():
                 'message': '未提供图片数据'
             }), 400
 
-        # 解码图片
-        image_data = base64.b64decode(image_base64)
+        # [C2-#6] 兼容可能的 data URL 前缀
+        raw = image_base64
+        if isinstance(raw, str) and raw.startswith('data:'):
+            try:
+                raw = raw.split(',', 1)[1]
+            except Exception:
+                raw = ''
+
+        # [C2-#6] base64 解码单独 try，失败返 400（不向上层泄露内部错误）
+        try:
+            image_data = base64.b64decode(raw, validate=True)
+        except Exception:
+            return jsonify({'code': 400, 'message': '图片 base64 解码失败'}), 400
+
         nparr = np.frombuffer(image_data, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -115,6 +194,11 @@ def detect_behavior():
                 'code': 400,
                 'message': '图片解码失败'
             }), 400
+
+        # [C2-#6] 限制输入尺寸，防止超大图耗尽内存/算力
+        h, w = image.shape[:2]
+        if w <= 0 or h <= 0 or max(w, h) > 4000:
+            return jsonify({'code': 400, 'message': '图片尺寸超出允许范围(最大 4000px)'}), 400
 
         # 图像预处理：CLAHE 增强低光照
         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
@@ -190,15 +274,16 @@ def detect_behavior():
         return jsonify(result)
 
     except Exception as e:
-        return jsonify({
-            'code': 500,
-            'message': f'检测失败: {str(e)}'
-        }), 500
+        # [C2-#6] 5xx 仅返回通用信息并记录日志，禁止泄露内部路径/堆栈
+        app.logger.error(f"detect_behavior failed: {e}")
+        return jsonify({'code': 500, 'message': '检测失败，请稍后重试'}), 500
 
 @app.route('/api/model/upload', methods=['POST'])
 def upload_model():
     """
-    上传训练好的模型
+    上传训练好的模型 [C2-#3]
+    注意：生产环境应关闭此运行时上传端点，模型经 CI 构建 / 只读挂载注入容器内，
+    避免任意模型上传导致 RCE 风险。当前已加鉴权 + 大小 + 后缀守卫作为兜底。
     """
     try:
         if 'model' not in request.files:
@@ -209,6 +294,11 @@ def upload_model():
 
         model_file = request.files['model']
         model_type = request.form.get('type', 'behavior')  # behavior only
+
+        # [C2-#3] 仅允许 .pt 后缀，拒绝其他可执行/脚本文件
+        original = model_file.filename or ''
+        if not original.lower().endswith('.pt'):
+            return jsonify({'code': 400, 'message': '仅允许上传 .pt 模型文件'}), 400
 
         # 保存模型文件
         save_dir = 'models'
@@ -228,14 +318,22 @@ def upload_model():
         })
 
     except Exception as e:
-        return jsonify({
-            'code': 500,
-            'message': f'上传失败: {str(e)}'
-        }), 500
+        # [C2-#6] 5xx 仅返回通用信息，禁止泄露内部路径
+        app.logger.error(f"upload_model failed: {e}")
+        return jsonify({'code': 500, 'message': '上传失败，请稍后重试'}), 500
+
+# [C2-#1] 模块导入即加载模型：gunicorn 多 worker 各自独立加载（python app.py 同样生效）
+load_models()
+
+
+# [C2-#3] 上传超 MAX_CONTENT_LENGTH 时返回统一信封（默认 413）
+@app.errorhandler(413)
+def _request_too_large(e):
+    return jsonify({'code': 413, 'message': '上传文件超出大小限制'}), 413
+
 
 if __name__ == '__main__':
-    # 启动时加载模型
-    load_models()
-
-    # 运行Flask应用
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # [C2-#1] 生产请用 gunicorn 启动（见 Procfile / gunicorn.conf.py）：
+    #   gunicorn -c gunicorn.conf.py app:app
+    # 以下仅保留本地开发入口，debug 必须 False（绝不可为 True 暴露 Werkzeug 调试器）。
+    app.run(host='0.0.0.0', port=5000, debug=False)

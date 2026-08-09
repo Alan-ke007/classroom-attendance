@@ -29,5 +29,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD python -c "import requests; requests.get('http://localhost:5000/health')" || exit 1
 
-# 启动应用
-CMD ["python", "app.py"]
+# 启动应用 [C2-#1] 生产用 gunicorn（多 worker 各加载独立模型，debug 关闭）
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]
