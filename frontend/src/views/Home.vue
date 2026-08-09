@@ -311,10 +311,10 @@ async function loadData() {
 
 /* ====== Bento Card Base ====== */
 .bento-card {
-  background: var(--c-glass-bg);
+  background: var(--panel);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--c-glass-border);
+  border: 1px solid var(--panel-border);
   border-radius: 18px;
   padding: 20px 22px;
   position: relative;
@@ -325,8 +325,8 @@ async function loadData() {
 
 .bento-card:hover {
   transform: translateY(-2px);
-  border-color: var(--c-glass-border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--c-glass-border-strong);
+  border-color: var(--panel-border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--panel-border-strong);
 }
 
 /* ====== Welcome Card ====== */
@@ -474,7 +474,7 @@ async function loadData() {
   width: 40px;
   height: 2px;
   border-radius: 1px;
-  background: var(--c-glass-border);
+  background: var(--panel-border);
 }
 
 .date-stats {

@@ -691,12 +691,12 @@ const getStatusText = (status) => {
 
 .stat-card {
   margin-bottom: 20px;
-  background: var(--c-glass-bg);
+  background: var(--panel);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid var(--c-glass-border);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--c-glass-shadow);
+  box-shadow: var(--panel-shadow);
   transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 .stat-card:hover {
@@ -750,11 +750,11 @@ const getStatusText = (status) => {
 
 .quality-item {
   text-align: center; padding: 16px 8px;
-  background: var(--c-glass-bg);
+  background: var(--panel);
   backdrop-filter: blur(8px) saturate(180%);
   -webkit-backdrop-filter: blur(8px) saturate(180%);
   border-radius: 12px;
-  border: 1px solid var(--c-glass-border);
+  border: 1px solid var(--panel-border);
   transition: all 0.3s ease;
 }
 .quality-item:hover {

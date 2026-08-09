@@ -173,12 +173,12 @@ const handleLogin = async () => {
 .form-card {
   width: 100%;
   padding: 44px 40px 40px;
-  background: var(--c-glass-bg);
+  background: var(--panel);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--c-glass-border);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--c-glass-shadow);
+  box-shadow: var(--panel-shadow);
 }
 
 /* 品牌头部 */
