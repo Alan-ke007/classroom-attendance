@@ -1,9 +1,13 @@
 // HTTP 请求封装
+import { BASE_URL as CONFIG_BASE_URL } from '@/config' // 地址外置，禁止写死内网 IP（见 config.js）
+
+// H5 走本地代理 /api（开发期 vite proxy）；生产可改为真实 https 域名（由 config 注入）
 // #ifdef H5
 const BASE_URL = '/api'
 // #endif
+// 小程序端使用外置配置地址：必须为 https 公网域名，环境差异走构建变量，不写死内网 IP
 // #ifdef MP-WEIXIN
-const BASE_URL = 'http://172.20.72.65:8080/api'
+const BASE_URL = CONFIG_BASE_URL
 // #endif
 
 function getToken() {

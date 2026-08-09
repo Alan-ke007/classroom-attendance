@@ -31,10 +31,6 @@
         <text class="footer-link" @tap="goRegister">还没有账号？立即注册</text>
       </view>
     </view>
-
-    <view class="demo-hint">
-      <text>管理员 admin/admin123 · 学生 202101001/123456</text>
-    </view>
   </view>
 </template>
 
@@ -43,8 +39,9 @@ import { ref } from 'vue'
 import { login } from '@/api/auth'
 import { setToken, setUserInfo } from '@/utils/storage'
 
-const username = ref('admin')
-const password = ref('admin123')
+// H7 安全修复：移除默认凭据 admin/admin123 预填，避免发布包携带明文口令
+const username = ref('')
+const password = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
 
@@ -123,7 +120,4 @@ function goRegister() {
 
 .form-footer { text-align: center; margin-top: 28rpx; }
 .footer-link { font-size: 26rpx; color: #4A90D9; }
-
-.demo-hint { margin-top: 40rpx; }
-.demo-hint text { font-size: 24rpx; color: rgba(255,255,255,0.7); }
 </style>

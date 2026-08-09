@@ -1,5 +1,7 @@
 // 算法服务 API (Flask YOLOv8)
-const ALGORITHM_BASE_URL = 'http://172.20.72.42:5000'
+import { ALGORITHM_BASE_URL } from '@/config'
+// 注意：当前前端直连算法服务仅用于开发/演示；
+// 生产环境应由后端中转鉴权，前端不直连（P1 整改项）。地址必须为 https。
 
 function request(method, url, data) {
   return new Promise((resolve, reject) => {
