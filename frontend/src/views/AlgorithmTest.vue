@@ -14,7 +14,7 @@
       <el-alert
         title="测试说明"
         type="info"
-        description="此页面用于测试前端与Flask算法服务的连接是否正常。确保Flask服务已在端口5000启动。"
+        description="此页面用于测试前端与后端算法代理的连接是否正常。算法能力经后端 /api/algorithm 代理转发，前端无需直连算法服务。"
         show-icon
         :closable="false"
         style="margin-bottom: 20px;"
@@ -39,8 +39,8 @@
                     {{ behaviorModelLoaded ? '✓ 已加载' : '⚠ 未加载' }}
                   </el-tag>
                 </el-descriptions-item>
-                <el-descriptions-item label="服务地址">
-                  http://localhost:5000
+                <el-descriptions-item label="算法接入">
+                  后端 /api/algorithm 代理（算法地址由后端配置）
                 </el-descriptions-item>
               </el-descriptions>
             </div>

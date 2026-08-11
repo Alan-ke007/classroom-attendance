@@ -24,7 +24,7 @@
       <el-alert
         title="功能说明"
         type="info"
-        description="通过摄像头或上传图片检测学生课堂行为（举手、阅读、书写、使用手机、低头、趴桌）。请确保检测服务已启动在端口5000。"
+        description="通过摄像头或上传图片检测学生课堂行为（举手、阅读、书写、使用手机、低头、趴桌）。算法检测经后端代理转发，请确保后端服务已启动且算法服务可达。"
         show-icon
         :closable="false"
         style="margin-bottom: 20px;"
@@ -240,7 +240,7 @@ async function checkAlgorithmService() {
     }
   } catch (error) {
     algorithmServiceStatus.value = 'offline'
-    ElMessage.warning('算法服务未连接，请确保Flask服务已启动（端口5000）')
+    ElMessage.warning('算法服务未连接，请确认后端已启动且算法服务可达（经后端 /api/algorithm 代理）')
     console.error('算法服务连接失败:', error)
   }
 }
