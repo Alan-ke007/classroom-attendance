@@ -52,6 +52,7 @@ public class LeaveRequestService {
         return leaveRequestMapper.selectPage(page, w);
     }
 
+    @Transactional
     public LeaveRequest apply(LeaveRequest req) {
         req.setStatus("pending");
         leaveRequestMapper.insert(req);
@@ -80,6 +81,7 @@ public class LeaveRequestService {
         return req;
     }
 
+    @Transactional
     public LeaveRequest reject(Long id, Long approverId, String remark) {
         LeaveRequest req = leaveRequestMapper.selectById(id);
         BusinessException.notNull(req, "请假申请不存在");

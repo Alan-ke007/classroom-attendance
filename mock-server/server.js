@@ -240,6 +240,18 @@ server.on('upgrade', (req, socket) => {
   socket.destroy()
 })
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[mock-server] 端口 ${PORT} 已被占用，请先关闭占用进程或修改 MOCK_PORT 后重试。`)
+    console.error(`[mock-server] 排查： lsof -i :${PORT}   /   MOCK_PORT=9090 node mock-server/server.js`)
+  } else {
+    console.error('[mock-server] 启动失败:', err && err.message)
+  }
+  process.exit(1)
+})
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[mock-server] 演示后端已启动: http://localhost:${PORT}`)
+  console.log(`[mock-server] 已注册 ${Object.keys(handlers).length} 个精确路由 + ${prefixHandlers.length} 个前缀路由（零依赖，仅供本地演示）`)
+  console.log(`[mock-server] 前端配套： cd frontend && npm run dev  （Vite 5173 反向代理 /api、/ws 到本服务）`)
 })

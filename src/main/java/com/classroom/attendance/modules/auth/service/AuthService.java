@@ -185,9 +185,11 @@ public class AuthService {
      *   真实投递（邮件/OTP）为后续项；当前仅在 DEBUG 日志打印原始令牌便于本地联调。
      */
     public void requestPasswordReset(String username, String email) {
+        BusinessException.isTrue(username != null && !username.isEmpty()
+                && email != null && !email.isEmpty(), "请输入用户名和邮箱");
         assertResetNotRateLimited();
         User user = findByUsername(username);
-        boolean valid = user != null && email != null && email.equals(user.getEmail());
+        boolean valid = user != null && email.equals(user.getEmail());
         if (!valid) {
             return; // 统一返回，不暴露账户是否存在
         }
@@ -204,7 +206,9 @@ public class AuthService {
 
     /**
      * C4（安全加固）：凭重置令牌改密。令牌为一次性 + 15 分钟 TTL，校验失败即用即废。
+     * 事务：令牌置废与用户改密跨两张表，须原子执行，避免“校验通过但改密失败、令牌却未作废”被并发重试利用。
      */
+    @Transactional
     public void resetPasswordWithToken(String token, String newPassword) {
         BusinessException.isTrue(newPassword != null && newPassword.length() >= Constants.User.PASSWORD_MIN_LEN,
                 "请填写新密码，至少" + Constants.User.PASSWORD_MIN_LEN + "位");
