@@ -20,6 +20,8 @@
       <view class="stat-card c-red"><text class="sc-num">{{ summary.absent }}</text><text class="sc-label">缺勤/请假</text></view>
     </view>
 
+    <view v-if="loading" class="loading">加载中...</view>
+    <block v-else>
     <view v-if="list.length === 0" class="empty">暂无考勤记录</view>
     <view v-for="item in list" :key="item.id" class="att-item">
       <view class="ai-left">
@@ -35,6 +37,7 @@
     <view class="bottom-bar">
       <button class="refresh-btn" @tap="refreshData">刷新数据</button>
     </view>
+    </block>
   </view>
 </template>
 
@@ -49,6 +52,7 @@ const courseNames = ref([])
 const selectedCourseId = ref('')
 const selectedCourseName = ref('')
 const filterDate = ref('')
+const loading = ref(false)
 
 const statusMap = { present: '出勤', late: '迟到', absent: '缺勤', leave: '请假' }
 
@@ -72,6 +76,7 @@ function onCourseChange(e) {
 }
 
 async function loadData() {
+  loading.value = true
   try {
     const params = {}
     if (filterDate.value) { params.startDate = filterDate.value; params.endDate = filterDate.value }
@@ -79,6 +84,7 @@ async function loadData() {
     const res = await getAttendanceList({ pageNum: 1, pageSize: 500, ...params })
     list.value = res.records || []
   } catch (e) { console.error('加载考勤失败', e) }
+  finally { loading.value = false }
 }
 
 async function refreshData() {
@@ -126,6 +132,7 @@ onMounted(async () => {
 .c-red .sc-num { color: #F56C6C; }
 
 .empty { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
+.loading { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
 
 .att-item {
   display: flex; align-items: center; background: #fff;

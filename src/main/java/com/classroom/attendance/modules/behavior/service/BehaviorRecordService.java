@@ -18,6 +18,7 @@ import com.classroom.attendance.modules.behavior.websocket.BehaviorAlertWebSocke
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -87,6 +88,13 @@ public class BehaviorRecordService {
             }
         }
 
+        // 数据越权防护：scoped 角色若解析不到任何过滤条件，不回退到全校数据。
+        if (!"admin".equals(role) && filterStudentId == null && CollectionUtils.isEmpty(filterClassIds)) {
+            Page<BehaviorRecord> empty = new Page<>(pageNum, pageSize);
+            empty.setTotal(0);
+            return empty;
+        }
+
         return getBehaviorList(pageNum, pageSize, filterStudentId, filterClassIds, behaviorType, handled);
     }
 
@@ -130,9 +138,19 @@ public class BehaviorRecordService {
     }
 
     public List<BehaviorRecord> getUnhandled() {
-        return behaviorRecordMapper.selectList(
-                new LambdaQueryWrapper<BehaviorRecord>().eq(BehaviorRecord::getHandled, 0)
-                        .orderByDesc(BehaviorRecord::getBehaviorTime));
+        String role = SecurityUtil.getCurrentRole();
+        LambdaQueryWrapper<BehaviorRecord> w = new LambdaQueryWrapper<BehaviorRecord>()
+                .eq(BehaviorRecord::getHandled, 0)
+                .orderByDesc(BehaviorRecord::getBehaviorTime);
+        if (!"admin".equals(role)) {
+            // 教师仅看本班未处理，避免越权查看全校；解析不到班级则返空。
+            List<Long> classIds = courseMapper.selectList(
+                    new LambdaQueryWrapper<Course>().eq(Course::getTeacherId, SecurityUtil.getCurrentUserId()).select(Course::getClassId))
+                    .stream().map(Course::getClassId).distinct().collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(classIds)) return List.of();
+            w.in(BehaviorRecord::getClassId, classIds);
+        }
+        return behaviorRecordMapper.selectList(w);
     }
 
     public List<BehaviorRecord> getByTimeRange(LocalDateTime start, LocalDateTime end) {
@@ -141,6 +159,7 @@ public class BehaviorRecordService {
                         .le(BehaviorRecord::getBehaviorTime, end).orderByDesc(BehaviorRecord::getBehaviorTime));
     }
 
+    @Transactional
     public BehaviorRecord create(BehaviorRecord record) {
         behaviorRecordMapper.insert(record);
         applyCreditScore(record);
@@ -166,6 +185,7 @@ public class BehaviorRecordService {
         behaviorRecordMapper.updateById(r);
     }
 
+    @Transactional
     public int saveDetections(List<BehaviorDetectionDTO> detections) {
         if (CollectionUtils.isEmpty(detections)) return 0;
 

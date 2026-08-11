@@ -1,6 +1,7 @@
 package com.classroom.attendance.modules.face.controller;
 
 import com.classroom.attendance.config.AlgorithmClient;
+import com.classroom.attendance.infrastructure.annotation.RequireRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,6 +46,7 @@ public class AlgorithmProxyController {
     @Qualifier("algorithmRestTemplate")
     private RestTemplate restTemplate;
 
+    @RequireRole({"admin", "teacher"})
     @PostMapping("/detect")
     public ResponseEntity<Map<String, Object>> detect(@RequestBody Map<String, Object> body) {
         return proxy(org.springframework.http.HttpMethod.POST, "/api/behavior/detect", body);
@@ -56,6 +58,7 @@ public class AlgorithmProxyController {
         return proxy(org.springframework.http.HttpMethod.GET, "/health", null);
     }
 
+    @RequireRole({"admin", "teacher"})
     @PostMapping("/model-upload")
     public ResponseEntity<Map<String, Object>> modelUpload(@RequestBody Map<String, Object> body) {
         return proxy(org.springframework.http.HttpMethod.POST, "/api/model/upload", body);

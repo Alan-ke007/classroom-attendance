@@ -85,7 +85,8 @@ public class JwtAuthFilter implements Filter {
                 }
             }
         }
-        return req.getParameter("token");
+        // 不再接受 ?token= 查询参数：令牌出现在 URL 会被写入访问日志/代理，削弱 httpOnly 价值。
+        return null;
     }
 
     private void writeUnauthorized(HttpServletResponse resp, String message) throws IOException {

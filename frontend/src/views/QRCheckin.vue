@@ -83,16 +83,11 @@ function generateQR() {
 }
 
 function drawQRCode(text) {
+  // 本地生成二维码，避免将含签到令牌的 text 发往任何第三方服务。
   import('qrcode').then(QRCode => {
     if (qrCanvas.value) QRCode.toCanvas(qrCanvas.value, text, { width: 260 })
   }).catch(() => {
-    // 备用：使用在线API生成
-    if (qrCanvas.value) {
-      const ctx = qrCanvas.value.getContext('2d')
-      const img = new Image()
-      img.onload = () => ctx.drawImage(img, 0, 0, 260, 260)
-      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(text)}`
-    }
+    ElMessage.error('本地二维码库加载失败，无法生成本地二维码')
   })
 }
 

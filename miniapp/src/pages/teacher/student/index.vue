@@ -16,6 +16,8 @@
       </scroll-view>
     </view>
 
+    <view v-if="loading" class="loading">加载中...</view>
+    <block v-else>
     <view v-if="filteredList.length === 0" class="empty">暂无学生数据</view>
 
     <view v-for="item in filteredList" :key="item.id" class="s-item">
@@ -28,6 +30,7 @@
         <text class="si-class">{{ item.className || '未分班' }}</text>
       </view>
     </view>
+    </block>
   </view>
 </template>
 
@@ -40,6 +43,7 @@ const list = ref([])
 const classes = ref([])
 const keyword = ref('')
 const selectedClassId = ref('')
+const loading = ref(false)
 
 const filteredList = computed(() => {
   let result = list.value
@@ -51,13 +55,18 @@ const filteredList = computed(() => {
   return result
 })
 
-function doSearch() {}
+function doSearch() {
+  loadData()
+}
 
 async function loadData() {
+  loading.value = true
   try {
-    const res = await getStudentList({ pageNum: 1, pageSize: 200 })
+    const kw = keyword.value.trim()
+    const res = await getStudentList({ pageNum: 1, pageSize: 200, ...(kw ? { keyword: kw } : {}) })
     list.value = res.records || []
   } catch (e) { console.error('加载学生列表失败', e) }
+  finally { loading.value = false }
 }
 
 async function loadClasses() {
@@ -92,6 +101,7 @@ onMounted(() => { loadClasses(); loadData() })
 .cls-tag.active { background: #4A90D9; color: #fff; }
 
 .empty { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
+.loading { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
 
 .s-item {
   display: flex; align-items: center; background: #fff;

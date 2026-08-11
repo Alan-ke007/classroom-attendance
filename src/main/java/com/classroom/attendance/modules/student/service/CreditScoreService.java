@@ -54,19 +54,14 @@ public class CreditScoreService {
 
     private void addScore(Long studentId, int delta, String reason) {
         if (studentId == null) return;
-        Student s = studentMapper.selectById(studentId);
-        if (s == null) return;
-        int current = s.getCreditScore() != null ? s.getCreditScore() : SCORE_INITIAL;
-        int newScore = clamp(current + delta);
-
-        s.setCreditScore(newScore);
+        // 单条原子 UPDATE：在数据库层面完成 clamp + 累加，天然避免并发丢失更新（无需事务）。
+        studentMapper.updateScoreClamp(studentId, delta, SCORE_MIN, SCORE_MAX);
         if (delta > 0) {
-            s.setCreditEarned((s.getCreditEarned() != null ? s.getCreditEarned() : 0) + delta);
+            studentMapper.updateCreditEarned(studentId, delta);
         } else if (delta < 0) {
-            s.setCreditDeducted((s.getCreditDeducted() != null ? s.getCreditDeducted() : 0) + Math.abs(delta));
+            studentMapper.updateCreditDeducted(studentId, Math.abs(delta));
         }
-        studentMapper.updateById(s);
-        log.debug("学生 {} 学风分变化: {} → {} ({}), 原因: {}", studentId, current, newScore, delta > 0 ? "+" + delta : "" + delta, reason);
+        log.debug("学生 {} 学风分变化: {} (原因: {})", studentId, delta > 0 ? "+" + delta : "" + delta, reason);
     }
 
     private int clamp(int score) {

@@ -112,6 +112,14 @@ public class AttendanceService {
             filterStudentId = matchedIds.get(0);
         }
 
+        // 数据越权防护：scoped 角色（学生/教师）若解析不到任何过滤条件，
+        // 绝不能回退到“全校数据”，否则会泄漏其他学生的考勤。仅 admin 可看全部。
+        if (!"admin".equals(role) && filterStudentId == null && CollectionUtils.isEmpty(filterClassIds)) {
+            Page<Attendance> empty = new Page<>(pageNum, pageSize);
+            empty.setTotal(0);
+            return empty;
+        }
+
         return getAttendanceList(pageNum, pageSize, filterStudentId, filterClassIds, status, startDate, endDate);
     }
 

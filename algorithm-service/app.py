@@ -33,6 +33,17 @@ USE_FP16 = (DEVICE == 'cuda')
 # [C2-#3] 上传限制：默认 50MB 上限（可用 ALGORITHM_MAX_UPLOAD_MB 调整）
 app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('ALGORITHM_MAX_UPLOAD_MB', '50')) * 1024 * 1024
 
+# [C2-#3] 运行时模型上传开关：默认关闭。
+# 生产环境模型应通过 CI 构建 / 只读挂载注入容器，不应开放运行时上传端点（否则攻击者可上传恶意
+# .pt 触发 pickle 反序列化导致 RCE）。仅当显式设置为 TRUE/true/1/YES 时开启；未设置、空、或
+# FALSE/false/0 一律视为关闭。
+_ALGORITHM_ENABLE_UPLOAD_RAW = os.environ.get('ALGORITHM_ENABLE_UPLOAD', '').strip().upper()
+ALGORITHM_ENABLE_UPLOAD = _ALGORITHM_ENABLE_UPLOAD_RAW in {'TRUE', '1', 'YES'}
+
+# [C2-#6] 图片解码像素面积上限（防内存 DoS）：默认约 2500 万像素（5000x5000），
+# 可用 ALGORITHM_MAX_IMAGE_PIXELS 覆盖。超过则在推理前返回 400/413。
+MAX_IMAGE_PIXELS = int(os.environ.get('ALGORITHM_MAX_IMAGE_PIXELS', '25000000'))
+
 # [C2-#3] 强制 torch.load 安全加载：默认 weights_only=True，阻断 pickle 任意代码执行
 # （torch>=2.6 原生默认即 True；此处显式兜底，兼容旧版本）
 try:
@@ -229,6 +240,16 @@ def detect_behavior():
         if w <= 0 or h <= 0 or max(w, h) > 4000:
             return jsonify({'code': 400, 'message': '图片尺寸超出允许范围(最大 4000px)'}), 400
 
+        # [C2-#6] 像素面积上限（防内存 DoS）：宽*高超过 MAX_IMAGE_PIXELS 直接拒绝，避免超大图撑爆内存
+        if w * h > MAX_IMAGE_PIXELS:
+            app.logger.warning(
+                f"detect_behavior rejected: image area {w}x{h}={w*h} exceeds limit {MAX_IMAGE_PIXELS}"
+            )
+            return jsonify({
+                'code': 413,
+                'message': '图片像素面积超出上限，请压缩后重试'
+            }), 413
+
         # 图像预处理：CLAHE 增强低光照
         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
         l, a, b = cv2.split(lab)
@@ -315,6 +336,12 @@ def upload_model():
     避免任意模型上传导致 RCE 风险。当前已加鉴权 + 大小 + 后缀守卫作为兜底。
     """
     try:
+        # [C2-#3] 运行时上传开关：生产环境默认关闭。模型应由 CI 构建 / 只读挂载注入容器，
+        # 开放运行时上传等同于给任意 .pt 上传留口子（可触发 pickle 反序列化 RCE）。
+        if not ALGORITHM_ENABLE_UPLOAD:
+            app.logger.warning("upload_model rejected: ALGORITHM_ENABLE_UPLOAD is disabled")
+            return jsonify({'code': 403, 'message': '运行时模型上传已禁用'}), 403
+
         if 'model' not in request.files:
             return jsonify({
                 'code': 400,
@@ -322,7 +349,15 @@ def upload_model():
             }), 400
 
         model_file = request.files['model']
-        model_type = request.form.get('type', 'behavior')  # behavior only
+        model_type = request.form.get('type', 'behavior')  # behavior / face
+
+        # [C2-#3] 白名单校验：仅允许已知类型，否则 400；杜绝 type 被用于构造恶意路径
+        if model_type not in ('behavior', 'face'):
+            return jsonify({'code': 400, 'message': '不支持的模型类型'}), 400
+
+        # [C2-#3] 基础净化：剔除路径分隔符与上级目录引用，确保 model_type 仅作为纯文件名片段，
+        # 阻断路径穿越（如 type=../../etc/passwd 之类写入 models 目录之外）
+        model_type = model_type.replace('/', '').replace('\\', '').replace('..', '')
 
         # [C2-#3] 仅允许 .pt 后缀，拒绝其他可执行/脚本文件
         original = model_file.filename or ''
@@ -399,6 +434,16 @@ def extract_face():
         h, w = image.shape[:2]
         if w <= 0 or h <= 0 or max(w, h) > 4000:
             return jsonify({'code': 400, 'message': '图片尺寸超出允许范围(最大 4000px)'}), 400
+
+        # [C2-#6] 像素面积上限（防内存 DoS）：宽*高超过 MAX_IMAGE_PIXELS 直接拒绝
+        if w * h > MAX_IMAGE_PIXELS:
+            app.logger.warning(
+                f"extract_face rejected: image area {w}x{h}={w*h} exceeds limit {MAX_IMAGE_PIXELS}"
+            )
+            return jsonify({
+                'code': 413,
+                'message': '图片像素面积超出上限，请压缩后重试'
+            }), 413
 
         # InsightFace 检测 + 识别（不限制 max_num，以便准确统计人脸数）
         faces = face_analyzer.get(image)

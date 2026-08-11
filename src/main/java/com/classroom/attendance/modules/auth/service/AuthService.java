@@ -220,14 +220,22 @@ public class AuthService {
             resetTokenMapper.deleteById(record.getId());
             throw new BusinessException("重置令牌无效或已过期");
         }
-        // 一次性：立即作废
-        record.setUsed(1);
-        resetTokenMapper.updateById(record);
+        // 一次性语义：以“WHERE used=0”原子置废，并发重试会被后到者挡下（避免 TOCTOU 重放）。
+        int updated = markUsedIfUnused(hash);
+        BusinessException.isTrue(updated == 1, "重置令牌无效或已过期");
 
         User user = findByUsername(record.getUsername());
         BusinessException.notNull(user, "用户不存在");
         user.setPassword(passwordEncoder.encode(newPassword));
         userMapper.updateById(user);
+    }
+
+    /** 原子置废重置令牌：仅当 used=0 时更新成功，返回影响行数（0 表示已被使用/不存在）。 */
+    private int markUsedIfUnused(String tokenHash) {
+        PasswordResetToken toUpdate = new PasswordResetToken();
+        toUpdate.setUsed(1);
+        return resetTokenMapper.update(toUpdate, new LambdaQueryWrapper<PasswordResetToken>()
+                .eq(PasswordResetToken::getTokenHash, tokenHash).eq(PasswordResetToken::getUsed, 0));
     }
 
     // ---- C4 辅助 ----
@@ -250,9 +258,14 @@ public class AuthService {
             ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attrs == null) return "unknown";
             HttpServletRequest req = attrs.getRequest();
-            String fwd = req.getHeader("X-Forwarded-For");
-            if (fwd != null && !fwd.isEmpty()) return fwd.split(",")[0].trim();
-            return req.getRemoteAddr();
+            String remote = req.getRemoteAddr();
+            // 仅当直接连接方为回环地址（即经由本机反向代理转发）时，才信任 X-Forwarded-For 取真实客户端 IP；
+            // 否则直接用 remoteAddr，避免外部攻击者伪造 XFF 绕过限流。
+            if (remote != null && (remote.equals("127.0.0.1") || remote.equals("::1") || remote.equals("0:0:0:0:0:0:0:1"))) {
+                String fwd = req.getHeader("X-Forwarded-For");
+                if (fwd != null && !fwd.isEmpty()) return fwd.split(",")[0].trim();
+            }
+            return remote;
         } catch (Exception e) {
             return "unknown";
         }

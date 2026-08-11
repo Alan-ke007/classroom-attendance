@@ -224,9 +224,8 @@ let timer = null
 let detectionTimer = null
 let seconds = 0
 
-// 组件加载时检查算法服务状态
+// 组件加载时检查算法服务状态（在 onMounted 中触发，避免 setup 顶层过早请求）
 console.log('BehaviorMonitor 组件已加载')
-checkAlgorithmService()
 
 // WebSocket连接将在组件挂载后建立
 let wsConnected = false
@@ -570,6 +569,7 @@ onMounted(() => {
   console.log('组件已挂载，连接WebSocket...')
   connectWebSocket()
   loadClasses()
+  checkAlgorithmService()
 })
 
 async function loadClasses() {

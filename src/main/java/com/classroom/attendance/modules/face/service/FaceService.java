@@ -20,6 +20,7 @@ import com.classroom.attendance.modules.student.service.CreditScoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -137,6 +138,7 @@ public class FaceService {
 
     // ===================== 合并端点：提取+比对+写签到 F7/F8 =====================
 
+    @Transactional
     public FaceCheckinResult faceCheckin(Long courseId, String image) {
         Long studentId = SecurityUtil.getCurrentStudentId();
         BusinessException.notNull(studentId, "未获取到学生身份，请先登录");

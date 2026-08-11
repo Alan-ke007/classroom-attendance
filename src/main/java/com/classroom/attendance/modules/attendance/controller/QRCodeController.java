@@ -14,6 +14,7 @@ import com.classroom.attendance.modules.student.service.CreditScoreService;
 import com.classroom.attendance.infrastructure.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -72,6 +73,7 @@ public class QRCodeController extends BaseController {
         return Result.success(result);
     }
 
+    @Transactional
     @PostMapping("/checkin")
     public Result<Map<String, Object>> checkin(@RequestBody Map<String, String> body) {
         String token = body.get("token");

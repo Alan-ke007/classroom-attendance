@@ -14,6 +14,8 @@
       <view class="sr-item sr-red"><text class="srn">{{ summary.absent }}</text><text class="srl">缺勤</text></view>
     </view>
 
+    <view v-if="loading" class="loading">加载中...</view>
+    <block v-else>
     <view v-if="list.length === 0" class="empty">暂无考勤记录</view>
     <view v-for="item in list" :key="item.id" class="att-item">
       <view class="ai-left">
@@ -28,6 +30,7 @@
 
     <view v-if="hasMore" class="load-more" @tap="loadMore">加载更多</view>
     <view v-else class="no-more">— 没有更多了 —</view>
+    </block>
   </view>
 </template>
 
@@ -48,6 +51,7 @@ const showDatePicker = ref(false)
 const list = ref([])
 const pageNum = ref(1)
 const hasMore = ref(true)
+const loading = ref(false)
 
 const summary = computed(() => {
   const all = list.value
@@ -69,6 +73,7 @@ function onStatusChange(e) {
 }
 
 async function loadData() {
+  if (pageNum.value === 1) loading.value = true
   try {
     const status = statusOpts[statusIdx.value].value
     const res = await getAttendanceList({
@@ -81,6 +86,7 @@ async function loadData() {
     else list.value = [...list.value, ...records]
     hasMore.value = records.length >= 20
   } catch (e) { console.error('加载考勤失败', e) }
+  finally { if (pageNum.value === 1) loading.value = false }
 }
 
 function loadMore() {
@@ -110,6 +116,7 @@ onMounted(loadData)
 .sr-red { border-bottom: 4rpx solid #F56C6C; }
 
 .empty { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
+.loading { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
 
 .att-item {
   display: flex; justify-content: space-between; align-items: center;

@@ -29,6 +29,8 @@
       </view>
     </view>
 
+    <view v-if="loading" class="loading">加载中...</view>
+
     <view class="section">
       <view class="s-header">
         <text class="s-title">今日课程</text>
@@ -78,6 +80,7 @@ const user = ref({})
 const today = ref('')
 const todayCourses = ref([])
 const stats = ref({ totalCourses: 0, presentCount: 0, absentCount: 0, rate: 100 })
+const loading = ref(false)
 
 const weekNames = ['周日','周一','周二','周三','周四','周五','周六']
 const quickItems = [
@@ -107,6 +110,7 @@ onMounted(async () => {
 
   const studentId = user.value.studentId
   const classId = user.value.classId
+  loading.value = true
   try {
     const [cRes, aRes, sRes] = await Promise.all([
       classId ? getCoursesByClassId(classId) : Promise.resolve([]),
@@ -131,6 +135,7 @@ onMounted(async () => {
       rate: ss.attendanceRate || 100
     }
   } catch (e) { console.error('加载数据失败', e) }
+  finally { loading.value = false }
 })
 </script>
 
@@ -160,6 +165,7 @@ onMounted(async () => {
 .s-more { font-size: 26rpx; color: #4A90D9; }
 
 .empty { text-align: center; padding: 60rpx 0; color: #c0c4cc; font-size: 28rpx; }
+.loading { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
 
 .course-card {
   display: flex; align-items: center; padding: 20rpx 0;

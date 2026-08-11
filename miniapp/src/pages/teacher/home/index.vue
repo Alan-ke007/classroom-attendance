@@ -11,6 +11,8 @@
       </view>
     </view>
 
+    <view v-if="loading" class="loading">加载中...</view>
+
     <view class="stats-row">
       <view class="stat-card c-blue" @tap="goPage('/pages/teacher/course/index')">
         <text class="sc-num">{{ stats.courses }}</text>
@@ -31,8 +33,7 @@
     </view>
 
     <view class="menu-section">
-      <view class="menu-item" v-for="m in menus" :key="m.path" @tap="goPage(m.path)">
-        <text class="mi-icon">{{ m.icon }}</text>
+      <view class="menu-item" v-for="m in menus" :key="m.path" @tap="goPage(m.path)">        <text class="mi-icon">{{ m.icon }}</text>
         <view class="mi-body">
           <text class="mi-title">{{ m.title }}</text>
           <text class="mi-desc">{{ m.desc }}</text>
@@ -52,6 +53,7 @@ import { switchTabBar } from '@/utils/tabBar'
 const user = ref({})
 const today = ref('')
 const stats = ref({ courses: 0, students: 0, todayAtt: 0, behaviors: 0 })
+const loading = ref(false)
 
 const menus = [
   { path: '/pages/teacher/course/index', icon: '📚', title: '课程管理', desc: '管理课程信息，生成签到二维码' },
@@ -72,6 +74,7 @@ onMounted(async () => {
   const w = ['日','一','二','三','四','五','六']
   today.value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} 星期${w[now.getDay()]}`
 
+  loading.value = true
   try {
     const res = await getDashboardStats()
     const d = res || {}
@@ -82,6 +85,7 @@ onMounted(async () => {
       behaviors: d.unhandledBehavior || 0
     }
   } catch (e) { console.error('加载统计失败', e) }
+  finally { loading.value = false }
 })
 </script>
 
@@ -114,6 +118,7 @@ onMounted(async () => {
 .sc-label { font-size: 22rpx; color: #909399; margin-top: 4rpx; }
 
 .menu-section { background: #fff; margin: 0 20rpx; border-radius: 16rpx; overflow: hidden; }
+.loading { text-align: center; padding: 120rpx 0; color: #c0c4cc; font-size: 28rpx; }
 .menu-item {
   display: flex; align-items: center; padding: 28rpx 24rpx;
   border-bottom: 1rpx solid #f5f5f5;

@@ -61,8 +61,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<String> handleException(Exception e) {
         log.error("系统异常: ", e);
-        return Result.error("系统错误: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        // 不向客户端泄露内部异常细节（含 SQL/路径等），统一返回文案，详细堆栈仅落服务端日志。
+        return Result.error("系统繁忙，请稍后重试");
     }
 }

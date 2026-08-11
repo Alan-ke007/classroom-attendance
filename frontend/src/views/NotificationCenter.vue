@@ -8,7 +8,7 @@
         </div>
       </template>
 
-      <el-tabs v-model="activeTab" @tab-change="loadList">
+      <el-tabs v-model="activeTab" @tab-change="onTabChange">
         <el-tab-pane label="全部" name="" />
         <el-tab-pane label="考勤" name="attendance" />
         <el-tab-pane label="行为" name="behavior" />
@@ -39,7 +39,7 @@
       <el-pagination
         v-if="total > 0" v-model:current-page="pageNum" v-model:page-size="pageSize"
         :total="total" :page-sizes="[10, 20]" layout="total, sizes, prev, pager, next"
-        style="margin-top: 16px; justify-content: flex-end" @change="loadList"
+        style="margin-top: 16px; justify-content: flex-end" @change="applyFilter"
       />
     </el-card>
   </div>
@@ -53,21 +53,39 @@ import request from '@/utils/request'
 
 const activeTab = ref('')
 const list = ref([])
+const allRecords = ref([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
 
 const iconMap = { attendance: '📋', behavior: '⚠️', leave: '📝', system: '🔔' }
 
-async function loadList() {
+// 后端 /notification/list 仅支持 pageNum/pageSize，不支持按 type 过滤，
+// 因此一次性拉取全量通知，在前端按 activeTab 过滤后再做客户端分页。
+async function loadAll() {
   try {
     const res = await request.get('/notification/list', {
-      params: { pageNum: pageNum.value, pageSize: pageSize.value }
+      params: { pageNum: 1, pageSize: 9999 }
     })
-    const all = res.data?.records || []
-    list.value = activeTab.value ? all.filter(n => n.type === activeTab.value) : all
-    total.value = all.length
+    allRecords.value = res.data?.records || []
+    applyFilter()
   } catch (e) { console.error('加载通知失败', e) }
+}
+
+// 按当前 tab 过滤并截取对应分页
+function applyFilter() {
+  const filtered = activeTab.value
+    ? allRecords.value.filter(n => n.type === activeTab.value)
+    : allRecords.value
+  total.value = filtered.length
+  const start = (pageNum.value - 1) * pageSize.value
+  list.value = filtered.slice(start, start + pageSize.value)
+}
+
+// 切换 tab 时重置回第一页，再重新过滤
+function onTabChange() {
+  pageNum.value = 1
+  applyFilter()
 }
 
 async function markRead(item) {
@@ -90,12 +108,13 @@ async function handleDelete(item) {
   try {
     await ElMessageBox.confirm('确定删除这条通知吗？', '提示', { type: 'warning' })
     await request.delete(`/notification/${item.id}`)
-    list.value = list.value.filter(n => n.id !== item.id)
+    allRecords.value = allRecords.value.filter(n => n.id !== item.id)
+    applyFilter()
     ElMessage.success('已删除')
   } catch (e) { /* cancelled or error */ }
 }
 
-onMounted(loadList)
+onMounted(loadAll)
 </script>
 
 <style scoped>
