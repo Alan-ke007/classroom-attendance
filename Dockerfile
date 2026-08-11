@@ -1,7 +1,8 @@
 FROM node:18-alpine AS frontend-build
 
-ARG VITE_API_BASE_URL
-ARG VITE_ALGORITHM_BASE_URL
+# 单镜像部署：前端由 Spring Boot 同源托管，API 走相对路径 /api（无需再声明 VITE_ALGORITHM_BASE_URL，
+# 算法请求已改为后端代理）。如需自定义前端 API 前缀可传入 VITE_API_BASE_URL（默认 /api）。
+ARG VITE_API_BASE_URL=/api
 
 WORKDIR /app
 COPY frontend/package*.json ./

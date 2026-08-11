@@ -71,3 +71,6 @@ algorithm-service/models/*.pt
 # Temp
 temp/
 tmp/
+
+# 用户本地工具配置（如 .claude/），勿提交
+.claude/

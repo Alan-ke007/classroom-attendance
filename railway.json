@@ -4,8 +4,7 @@
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile",
     "buildArgs": {
-      "VITE_API_BASE_URL": "/api",
-      "VITE_ALGORITHM_BASE_URL": "https://algorithm-production-3e49.up.railway.app"
+      "VITE_API_BASE_URL": "/api"
     }
   },
   "deploy": {

@@ -47,20 +47,21 @@ public class AlgorithmProxyController {
 
     @PostMapping("/detect")
     public ResponseEntity<Map<String, Object>> detect(@RequestBody Map<String, Object> body) {
-        return proxy("/api/behavior/detect", body);
+        return proxy(org.springframework.http.HttpMethod.POST, "/api/behavior/detect", body);
     }
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
-        return proxy("/health", null);
+        // 算法 /health 仅注册 GET（methods=['GET']），代理必须按原方法转发，否则 Flask 返回 405。
+        return proxy(org.springframework.http.HttpMethod.GET, "/health", null);
     }
 
     @PostMapping("/model-upload")
     public ResponseEntity<Map<String, Object>> modelUpload(@RequestBody Map<String, Object> body) {
-        return proxy("/api/model/upload", body);
+        return proxy(org.springframework.http.HttpMethod.POST, "/api/model/upload", body);
     }
 
-    private ResponseEntity<Map<String, Object>> proxy(String path, Object body) {
+    private ResponseEntity<Map<String, Object>> proxy(HttpMethod method, String path, Object body) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -68,11 +69,11 @@ public class AlgorithmProxyController {
             if (apiKey != null && !apiKey.isBlank()) {
                 headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
             }
-            ResponseEntity<Map> resp = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> resp = restTemplate.exchange(
                     algorithmClient.getBaseUrl() + path,
-                    org.springframework.http.HttpMethod.POST,
+                    method,
                     new org.springframework.http.HttpEntity<>(body, headers),
-                    Map.class);
+                    (Class<Map<String, Object>>) (Class<?>) Map.class);
             Map<String, Object> respBody = resp.getBody();
             return ResponseEntity.status(resp.getStatusCode()).body(respBody);
         } catch (HttpStatusCodeException e) {
