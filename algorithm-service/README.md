@@ -7,7 +7,7 @@
 - **行为检测**: 检测6种课堂行为（举手、阅读、书写、玩手机、低头、趴桌）
 - **RESTful API**: 提供标准的HTTP接口
 - **GPU加速**: 支持NVIDIA GPU加速推理
-- **高性能**: mAP50达到85.9%（行为检测）
+- **高性能**: mAP50 达 85.9%（训练版本报告值；最终指标请以 `evaluate_model.py` 在你本地 GPU 复现为准，见「评估与复现」章节）
 
 ## 系统要求
 
@@ -46,9 +46,11 @@ curl -X POST http://localhost:5000/api/behavior/detect \
 
 ## 模型性能
 
+> ⚠️ 以下 mAP 数值为**训练版本报告值**，论文引用前必须通过 `evaluate_model.py` 在本地 GPU 环境复现验证（学术诚信要求，不可直接照搬）。
+
 ### 行为检测模型
 - **数据集**: 6021张图片（合并三个数据集）
-- **mAP50**: 85.9%
+- **mAP50**: 85.9%（报告值，待复现）
 - **mAP50-95**: 65.0%
 - **推理速度**: 1.1ms/图 (RTX 3060)
 
@@ -60,6 +62,24 @@ curl -X POST http://localhost:5000/api/behavior/detect \
 | 阅读 | 80.5% |
 | 书写 | 77.2% |
 | 举手 | 76.9% |
+
+### 评估与复现
+
+在具备 GPU 的环境运行评估脚本，得到真实可引用的指标（含逐类 Precision/Recall、混淆矩阵图、预测 vs 人工标注对比样本）：
+
+```bash
+# 1) 修改 evaluate_model.py 顶部的 MODEL_PATH / DATA_YAML（指向本地 best.pt 与 merged_dataset.yaml）
+# 2) 运行评估
+python evaluate_model.py
+```
+
+输出：
+- `runs/evaluation/behavior_detection_evaluation.json`：整体 + 逐类指标（mAP@0.5 / Precision / Recall）
+- `runs/evaluation/behavior_detection_report.txt`：文本报告
+- `runs/evaluation/behavior_detection/confusion_matrix.png`：**混淆矩阵图（模型预测类别 vs 人工标注类别对比）**
+- 若将 `VAL_IMAGES_DIR` 指向验证图片目录，还会在 `runs/evaluation/predictions/samples/` 生成**带预测框的对比样本图**（人工标注见数据集 `labels/`）
+
+> 论文中的 mAP 数值**必须**取自上述本地复现结果，而非直接沿用上方报告值。
 
 ## 项目结构
 

@@ -5,8 +5,10 @@ import com.classroom.attendance.infrastructure.annotation.RequireRole;
 import com.classroom.attendance.infrastructure.base.BaseController;
 import com.classroom.attendance.infrastructure.response.Result;
 import com.classroom.attendance.infrastructure.util.ExcelExportUtil;
+import com.classroom.attendance.modules.behavior.dto.AttentionResult;
 import com.classroom.attendance.modules.behavior.dto.BehaviorDetectionDTO;
 import com.classroom.attendance.modules.behavior.entity.BehaviorRecord;
+import com.classroom.attendance.modules.behavior.service.AttentionService;
 import com.classroom.attendance.modules.behavior.service.BehaviorRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 public class BehaviorRecordController extends BaseController {
 
     private final BehaviorRecordService behaviorRecordService;
+    private final AttentionService attentionService;
 
     @GetMapping("/list")
     public Result<Page<BehaviorRecord>> getBehaviorList(
@@ -144,5 +147,33 @@ public class BehaviorRecordController extends BaseController {
         } catch (IOException e) {
             throw new com.classroom.attendance.infrastructure.exception.BusinessException(500, "导出失败", e);
         }
+    }
+
+    @RequireRole({"admin", "teacher"})
+    @GetMapping("/attention/student")
+    public Result<AttentionResult> studentAttention(
+            @RequestParam Long studentId,
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return Result.success(attentionService.computeStudentAttention(studentId, courseId, start, end));
+    }
+
+    @RequireRole({"admin", "teacher"})
+    @GetMapping("/attention/class")
+    public Result<AttentionResult> classAttention(
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return Result.success(attentionService.computeClassAttention(courseId, start, end));
+    }
+
+    @RequireRole({"admin", "teacher"})
+    @GetMapping("/attention/class/detail")
+    public Result<List<AttentionResult>> classAttentionDetail(
+            @RequestParam(required = false) Long courseId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+        return Result.success(attentionService.computeClassAttentionDetail(courseId, start, end));
     }
 }

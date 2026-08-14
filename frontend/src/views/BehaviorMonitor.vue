@@ -165,6 +165,12 @@
                 <div class="stat-label">监控时长</div>
                 <div class="stat-value">{{ monitorDuration }}</div>
               </div>
+              <div class="stat-item">
+                <div class="stat-label">课堂专注度(ATI)</div>
+                <div class="stat-value" :style="{ color: atiColor(attention.ati) }">
+                  {{ attention.ati >= 0 ? '+' : '' }}{{ attention.ati }} <small>{{ attention.level }}</small>
+                </div>
+              </div>
             </div>
           </el-card>
           
@@ -385,6 +391,34 @@ const captureAndDetect = async () => {
 }
 
 // 从图片检测行为
+// 课堂专注度指数 ATI（与后端 AttentionService 同一公式）：正向行为占比 − 加权负向行为占比
+const attention = ref({ ati: 0, level: '—', focus: 0, violation: 0 })
+const FOCUS_TYPES = ['raising_hand', 'reading', 'writing']
+const VIOLATION_TYPES = ['using_phone', 'bowing_head', 'leaning_over']
+const ATI_ALPHA = 1.2
+const ATI_EPS = 1e-6
+
+function accumulateAttention(list) {
+  if (!list || !list.length) return
+  list.forEach(b => {
+    if (FOCUS_TYPES.includes(b.type)) attention.value.focus++
+    else if (VIOLATION_TYPES.includes(b.type)) attention.value.violation++
+  })
+  const nf = attention.value.focus
+  const nv = attention.value.violation
+  let ati = (nf - ATI_ALPHA * nv) / (nf + nv + ATI_EPS) * 100
+  ati = Math.max(-100, Math.min(100, ati))
+  attention.value.ati = Math.round(ati)
+  attention.value.level = ati >= 60 ? '优' : ati >= 40 ? '良' : ati >= 20 ? '中' : '差'
+}
+
+function atiColor(a) {
+  if (a >= 60) return '#52c41a'
+  if (a >= 40) return '#1677ff'
+  if (a >= 20) return '#fa8c16'
+  return '#ff4d4f'
+}
+
 const detectBehaviorFromImage = async (imageData) => {
   detecting.value = true
   
@@ -420,6 +454,9 @@ const detectBehaviorFromImage = async (imageData) => {
       
       console.log(`检测到 ${res.data.totalCount} 个行为，${abnormalCount} 个异常`)
       ElMessage.success(`检测完成！发现 ${res.data.totalCount} 个行为`)
+
+      // 累加专注度统计（正向/负向行为 → ATI）
+      accumulateAttention(res.data.behaviors)
 
       // 自动保存检测结果到数据库
       saveDetectionResults(res.data.behaviors)

@@ -226,7 +226,7 @@ public class BehaviorRecordService {
             creditScoreService.addPositiveBehavior(r.getStudentId());
         } else if ("using_phone".equals(type)) {
             creditScoreService.addPhoneViolation(r.getStudentId());
-        } else if (List.of("bowing_head", "leaning_over", "sleeping").contains(type)) {
+        } else if (List.of("bowing_head", "leaning_over").contains(type)) {
             creditScoreService.addMinorViolation(r.getStudentId());
         }
     }
