@@ -1,15 +1,28 @@
-# 课堂智能考勤系统
+# 课堂智能考勤系统 · Classroom Smart Attendance
 
-基于 YOLOv8 与 Spring Boot 的校园课堂智能考勤与行为分析系统。
+> An AI-powered classroom attendance & behavior-analysis system built on **YOLOv8** + **Spring Boot** + **Vue3** + **uni-app**.
+> 基于 YOLOv8 与 Spring Boot 的校园课堂智能考勤与行为分析系统。
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Model: YOLOv8](https://img.shields.io/badge/Model-YOLOv8-orange.svg)](https://github.com/ultralytics/ultralytics)
+[![Backend: Spring Boot 3.2](https://img.shields.io/badge/Backend-Spring%20Boot%203.2-brightgreen.svg)]()
+
+## ✨ 核心亮点
+
+- **🎯 课堂行为识别（核心创新）**：基于 YOLOv8 的 6 分类行为检测（举手 / 阅读 / 书写 / 玩手机 / 低头 / 趴桌），mAP@50 85.9%。
+- **📊 课堂专注度指数 ATI**：把行为量化成可写进论文的专注度分数，输出 优 / 良 / 中 / 差 等级。
+- **⚡ 双模考勤**：二维码扫码 + 人脸识别两种签到入口。
+- **🔔 实时异常预警**：违纪行为通过 WebSocket 实时推送到教师端。
+- **🔒 工程化安全**：JWT（httpOnly Cookie）、算法代理鉴权、越权防护、并发原子更新。
 
 ## 🎉 项目状态
 
-**✅ 基础框架已完成！** 包含后端、前端、算法服务三部分，登录功能已实现并可运行。
+**✅ 全栈可用**：后端（Spring Boot 3.2 + MyBatis-Plus）、前端管理后台（Vue3）、微信小程序（uni-app）、算法微服务（Flask + YOLOv8）四端闭环。
 
-**🆕 最新进展 (2026-05-09)**:
-- ✅ **算法模型训练完成** - YOLOv8行为检测模型（mAP@50: 85.9%）
-- ✅ **前端API集成完成** - 行为检测功能已接入真实算法服务
-- ✅ **测试工具就绪** - 提供专用测试页面和自动化测试脚本
+**🆕 核心能力**:
+- ✅ **YOLOv8 行为检测模型**（mAP@50: 85.9%，训练报告值，以 `algorithm-service/evaluate_model.py` 本机复现为准）
+- ✅ **智能考勤专注度算法 ATI**（后端 `AttentionService` + 前端实时监控展示）
+- ✅ **双模考勤 / 实时预警 / 多维报表** 已落地
 
 ## 技术栈
 
@@ -38,39 +51,24 @@
 
 ```
 classroom-attendance/
-├── src/                          # Spring Boot后端
+├── src/                  # Spring Boot 后端（com.classroom.attendance，按 modules 分模块）
 │   ├── main/java/com/classroom/attendance/
-│   │   ├── controller/          # 控制器（ClassController, AuthController）
-│   │   ├── service/             # 服务层
-│   │   ├── mapper/              # 数据访问层
-│   │   ├── model/               # 实体类（ClassInfo, User）
-│   │   └── utils/               # 工具类（JwtUtil）
-│   └── main/resources/
-│       ├── application.yml      # 配置文件
-│       └── init_db.sql          # 数据库初始化脚本（6张表）
-├── frontend/                     # Vue3前端
-│   ├── src/
-│   │   ├── api/                 # API接口封装
-│   │   │   ├── auth.js          # 认证相关API
-│   │   │   └── algorithm.js     # 算法服务API（新增）
-│   │   ├── views/               # 页面组件
-│   │   │   ├── BehaviorMonitor.vue      # 行为监控（已集成API）
-│   │   │   └── AlgorithmTest.vue        # 算法测试
-│   │   ├── router/              # 路由配置
-│   │   └── utils/               # 工具函数（axios封装）
-│   └── package.json
-├── algorithm-service/            # Python算法服务
-│   ├── app.py                   # Flask主应用
-│   ├── models/                  # 训练好的YOLOv8模型
-│   │   └── behavior_best.pt     # 行为检测模型
-│   ├── runs/train/              # 训练结果和日志
-│   └── requirements.txt         # Python依赖
-├── pom.xml                       # Maven配置
-├── start_all.bat                # 一键启动脚本
-├── test_algorithm_integration.bat  # 算法集成测试脚本（新增）
-├── START_GUIDE.md               # 完整启动指南
-├── FRONTEND_ALGORITHM_INTEGRATION.md  # 前端API集成指南（新增）
-└── INTEGRATION_COMPLETION_REPORT.md   # 集成完成报告（新增）
+│   │   ├── config/            # Spring 装配
+│   │   ├── infrastructure/    # 跨切面：鉴权注解 / 异常 / 拦截 / 响应封装 / 工具
+│   │   ├── security/          # JwtAuthFilter
+│   │   └── modules/           # 业务模块（auth / attendance / behavior / face / course / student / leave / notification ...）
+│   └── main/resources/        # application.yml / init_db.sql
+├── frontend/             # Vue3 + Element Plus 管理后台
+├── miniapp/              # uni-app 微信小程序（学生端 / 教师端）
+├── algorithm-service/    # Flask + YOLOv8 算法微服务
+│   ├── app.py            # 检测 / 识别接口
+│   ├── evaluate_model.py # 评估（逐类 Precision/Recall、混淆矩阵）
+│   └── train_new_datasets.py   # 训练脚本
+├── docs/                 # 设计 / 接口文档
+├── docker/               # Docker 编排（docker-compose）
+├── scripts/              # 初始化 / 启动脚本
+├── pom.xml               # Maven 配置
+└── README.md
 ```
 
 ## 快速开始
@@ -225,29 +223,27 @@ python app.py
 ## 功能模块
 
 ### 已实现 ✅
-- ✅ 用户认证系统（JWT）
-- ✅ 用户登录/注册
-- ✅ 班级管理 CRUD
-- ✅ MyBatis-Plus 分页查询
-- ✅ 统一返回结果封装
-- ✅ 全局异常处理
-- ✅ CORS跨域配置
-- ✅ 逻辑删除
-- ✅ 自动填充时间字段
-- ✅ Vue3前端登录页面
-- ✅ Dashboard主页
-- ✅ Python算法服务框架
-- ✅ **YOLOv8模型训练** - 行为检测模型（mAP@50: 85.9%）
-- ✅ **前端API集成** - 行为检测功能
-- ✅ **算法测试工具** - 专用测试页面和自动化脚本
+**后端（Spring Boot）**
+- ✅ 多角色鉴权（学生 / 教师 / 管理员，JWT httpOnly Cookie）
+- ✅ 课程 / 班级 / 师生管理
+- ✅ 双模考勤：二维码签到 + 人脸识别签到
+- ✅ 课堂行为识别（YOLOv8 六类）+ 行为记录落库
+- ✅ **课堂专注度指数 ATI**（`AttentionService`，按学生 / 班级 / 课程统计）
+- ✅ 异常行为实时预警（WebSocket）
+- ✅ 请假 / 消息 / 公告 / 多维统计报表
+- ✅ 统一返回、全局异常、CORS、逻辑删除、自动填充
 
-### 待实现 ⏳
-- ⏳ 学生信息管理
-- ⏳ 课程管理
-- ⏳ 考勤记录保存（将识别结果写入数据库）
-- ⏳ 实时预警（WebSocket）
-- ⏳ 数据可视化（ECharts）
-- ⏳ 报表导出（Excel）
+**前端（Vue3 管理后台）**
+- ✅ 登录 / Dashboard / 课程班级 / 考勤 / 行为监控（实时 ATI + 预警）/ 报表
+
+**小程序（uni-app）**
+- ✅ 学生端：课表 / 签到 / 行为查询；教师端：班级 / 考勤 / 搜索
+
+**算法服务（Flask + YOLOv8）**
+- ✅ 行为检测接口、模型评估（逐类 P/R、混淆矩阵）、训练脚本
+
+### 明确不做 ❌
+- ❌ 数据可视化"大屏"：本项目定位为毕业设计，核心创新在算法（YOLOv8 行为识别 + ATI），大屏非重点，故不设计。
 
 ## 注意事项
 
@@ -268,4 +264,9 @@ python app.py
 
 ## 许可证
 
-MIT License
+本项目基于 [MIT License](LICENSE) 开源。
+
+## 🏷️ 推荐 GitHub Topics
+
+在仓库 `About → Edit` 中添加以下标签，可显著提升被检索概率：
+`yolov8` · `computer-vision` · `attendance` · `classroom` · `spring-boot` · `vue3` · `uni-app` · `graduation-project` · `flask` · `object-detection`
